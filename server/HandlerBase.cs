@@ -38,6 +38,7 @@ namespace Maps
                     case "print": style = Stylesheet.Style.Print; break;
                     case "candy": style = Stylesheet.Style.Candy; break;
                     case "draft": style = Stylesheet.Style.Draft; break;
+                    case "fasa": style = Stylesheet.Style.FASA; break;
                 }
             }
         }
@@ -72,15 +73,23 @@ namespace Maps
             return defaultValue;
         }
 
+        protected string[] GetStringsOption(HttpContext context, string name, string[] defaultValue = null)
+        {
+            string s = GetStringOption(context, name);
+            if (string.IsNullOrWhiteSpace(s))
+                return defaultValue;
+            return s.Split(new char[] { '|' });
+        }
+
         protected int GetIntOption(HttpContext context, string name, int defaultValue)
         {
             return GetIntOption(context.Request, name, Defaults(context), defaultValue);
         }
         public static int GetIntOption(HttpRequest request, string name, IDictionary<string, Object> queryDefaults, int defaultValue)
         {
-            int temp;
-            if (Int32.TryParse(GetStringOption(request, name, queryDefaults), NumberStyles.Integer, CultureInfo.InvariantCulture, out temp))
-                return temp;
+            double temp;
+            if (Double.TryParse(GetStringOption(request, name, queryDefaults), NumberStyles.Float, CultureInfo.InvariantCulture, out temp))
+                return (int)Math.Round(temp);
             return defaultValue;
         }
 

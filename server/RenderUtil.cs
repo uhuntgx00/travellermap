@@ -9,6 +9,14 @@ using System.Linq;
 
 namespace Maps.Rendering
 {
+    // Wrapper to allow locking, since Image is [MarshalByRefObject]
+    public class ImageHolder
+    {
+        public ImageHolder(Image image) { m_image = image; }
+        public Image Image {  get { return m_image; } }
+        private Image m_image;
+    }
+
     public static class RenderUtil
     {
         /*
@@ -38,7 +46,7 @@ namespace Maps.Rendering
             edgeY = (type == PathUtil.PathType.Hex) ? RenderUtil.HexEdgesY : RenderUtil.SquareEdgesY;
         }
 
-        public static void DrawImageAlpha(XGraphics graphics, float alpha, Image image, Rectangle targetRect)
+        public static void DrawImageAlpha(XGraphics graphics, float alpha, ImageHolder holder, Rectangle targetRect)
         {
             if (alpha <= 0f)
                 return;
@@ -48,11 +56,12 @@ namespace Maps.Rendering
             alpha = (float)Math.Round(alpha * 16f) / 16f;
             int key = (int)Math.Round(alpha * 16);
 
+            Image image = holder.Image;
             XImage ximage;
 
             int w = image.Width, h = image.Height;
 
-            lock (image)
+            lock (holder)
             {
                 if (image.Tag == null || !(image.Tag is Dictionary<int, XImage>))
                     image.Tag = new Dictionary<int, XImage>();
@@ -144,6 +153,9 @@ namespace Maps.Rendering
                 g.RotateTransform(labelStyle.Rotation);
                 g.ScaleTransform(labelStyle.Scale.Width, labelStyle.Scale.Height);
 
+                if (labelStyle.Rotation != 0)
+                    g.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
                 XSize size = g.MeasureString(text, font);
                 size.Width *= 2; // prevent cut-off e.g. when rotated
                 XRect bounds = new XRect(-size.Width / 2, -size.Height / 2, size.Width, size.Height);
@@ -159,7 +171,7 @@ namespace Maps.Rendering
             return new SaveGraphicsState(g);
         }
 
-        public class SaveGraphicsState : IDisposable
+        sealed public class SaveGraphicsState : IDisposable
         {
             private XGraphics g;
             private XGraphicsState gs;
@@ -172,9 +184,14 @@ namespace Maps.Rendering
 
             #region IDisposable Members
 
-            void IDisposable.Dispose()
+            public void Dispose()
             {
-                this.g.Restore(this.gs);
+                if (this.g != null && this.gs != null)
+                {
+                    this.g.Restore(this.gs);
+                    this.g = null;
+                    this.gs = null;
+                }
             }
 
             #endregion
@@ -303,7 +320,7 @@ namespace Maps.Rendering
             { "*.C", Glyph.StarStar.BiasBottom }, // Vargr Corsair Base
             { "Im.D", Glyph.Square.BiasBottom }, // Imperial Depot
             { "*.D", Glyph.Square.Highlight}, // Depot
-            { "*.E", Glyph.StarStar.BiasBottom }, // Hiver Embassy (non-standard)
+            { "*.E", Glyph.StarStar.BiasBottom }, // Hiver Embassy
             { "*.K", Glyph.Star5Point.Highlight.BiasTop }, // Naval Base
             { "*.M", Glyph.Star4Point.BiasBottom }, // Military Base
             { "*.N", Glyph.Star5Point.BiasTop }, // Imperial Naval Base
@@ -312,9 +329,9 @@ namespace Maps.Rendering
             { "*.S", Glyph.Triangle.BiasBottom }, // Imperial Scout Base
             { "*.T", Glyph.Star5Point.Highlight.BiasTop }, // Aslan Tlaukhu Base
             { "*.V", Glyph.Circle.BiasBottom }, // Exploration Base
+            { "Zh.W", Glyph.Diamond.Highlight }, // Zhodani Relay Station
             { "*.W", Glyph.Triangle.Highlight.BiasBottom }, // Imperial Scout Waystation
-            { "*.X", Glyph.Diamond.Highlight }, // Zhodani Relay Station
-            { "*.Z", Glyph.Diamond }, // Zhodani Naval/Military Base (non-standard)
+            { "Zh.Z", Glyph.Diamond }, // Zhodani Base (Special case for "Zh.KM")
             { "*.*", Glyph.Circle }, // Independent Base
         };
 
@@ -369,7 +386,7 @@ namespace Maps.Rendering
                     if (checkFirst < 3)
                         break;
                 }
-                else if (!startHexVisited)
+                else if (!startHexVisited)  
                 {
                     startHex = hex;
                     startHexVisited = true;

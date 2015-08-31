@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<title>Poster Maker - Traveller Map</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" href="../favicon.ico">
+<link rel="stylesheet" href="../site.css?update=2015-08-04">
+<script src="../lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
+<script src="../map.js?update=2015-08-04"></script>
+<script src="post.js?update=2015-07-29"></script>
+
+<h1>The Traveller Map - Poster Maker</h1>
+<div id="content" style="width: 660px;">
+<div>
+Select a sector, or enter your own data below:
+<select id="sector">
+  <option disabled>Select...</option>
+</select>
+</div>
+
+<form id="form" target="_blank" method="POST">
+  <div>Sector Data:
+    (<a target="_blank" href="../doc/fileformats">file formats</a>)</div>
+  <textarea id="data" name="data" class="drag-n-drop"
+            style="width: 650px; height: 120px; white-space: pre;"
+            spellcheck="false" wrap="off" cols="80" rows="10"></textarea>
+
+  <div>Metadata:
+    (<a target="_blank" href="../doc/metadata">XML</a> or
+    <a target="_blank" href="http://dotclue.org/t20/">MSEC</a>)</div>
+  <textarea id="metadata" name="metadata" class="drag-n-drop"
+            style="width: 650px; height: 120px; white-space: pre;"
+            spellcheck="false" wrap="off" cols="80" rows="10"></textarea>
+
+  <table id="option_columns">
+    <style>
+    table#option_columns > tbody> tr > td { padding: 0 20px; }
+    </style>
+    <tr>
+      <td>
+        <table id="label_grid">
+          <tr>
+            <td style="text-align: right">Format:
+            <td>
+              <select id="accept" name="accept">
+                <option selected value="application/pdf">PDF (for printing)</option>
+                <option value="">Bitmap (for screen)</option>
+              </select>
+          </tr>
+          <tr>
+            <td style="text-align: right">Show:
+            <td>
+              <select id="portion" name="">
+                <option data-name="" value="" selected>Whole Sector</option>
+                <option data-name="subsector" value="A">Subsector A</option>
+                <option data-name="subsector" value="B">Subsector B</option>
+                <option data-name="subsector" value="C">Subsector C</option>
+                <option data-name="subsector" value="D">Subsector D</option>
+                <option data-name="subsector" value="E">Subsector E</option>
+                <option data-name="subsector" value="F">Subsector F</option>
+                <option data-name="subsector" value="G">Subsector G</option>
+                <option data-name="subsector" value="H">Subsector H</option>
+                <option data-name="subsector" value="I">Subsector I</option>
+                <option data-name="subsector" value="J">Subsector J</option>
+                <option data-name="subsector" value="K">Subsector K</option>
+                <option data-name="subsector" value="L">Subsector L</option>
+                <option data-name="subsector" value="M">Subsector M</option>
+                <option data-name="subsector" value="N">Subsector N</option>
+                <option data-name="subsector" value="O">Subsector O</option>
+                <option data-name="subsector" value="P">Subsector P</option>
+                <option data-name="quadrant" value="Alpha">Quadrant Alpha </option>
+                <option data-name="quadrant" value="Beta">Quadrant Beta </option>
+                <option data-name="quadrant" value="Gamma">Quadrant Gamma </option>
+                <option data-name="quadrant" value="Delta">Quadrant Delta </option>
+              </select>
+              <script>
+              document.querySelector('select#portion').addEventListener('change', function(e) {
+                var select = e.target;
+                var option = select.querySelectorAll('option')[select.selectedIndex];
+                select.setAttribute('name', option.getAttribute('data-name'));
+              });
+              </script>
+          </tr>
+          <tr>
+            <td style="text-align: right">Style:
+            <td>
+              <select name="style">
+                <option value="poster" selected>Black background (Color)</option>
+                <option value="print">White background (Color)</option>
+                <option value="atlas">White background (B&amp;W)</option>
+                <option value="candy">Eye candy</option>
+                <option value="draft">Draft</option>
+                <option value="fasa">FASA (experimental)</option>
+              </select>
+          </tr>
+          <tr>
+            <td style="text-align: right">Rotation:
+            <td>
+              <select name="rotation">
+                <option value="">None</option>
+                <option value="1">90&deg; CW</option>
+                <option value="2">180&deg;</option>
+                <option value="3">90&deg; CCW</option>
+              </select>
+          </tr>
+          <tr>
+            <td style="text-align: right">Scale:
+            <td>
+              <select name="scale">
+                <option value="16">16 pixels/parsec - dotmap</option>
+                <option value="32">32 pixels/parsec - atlas</option>
+                <option value="64" selected>64 pixels/parsec - classic</option>
+                <option value="128">128 pixels/parsec - uwp</option>
+              </select>
+          </tr>
+          <tr>
+            <td style="text-align: right">Hex numbers:
+            <td>
+              <select name="sscoords">
+                <option selected>Sector (3240)</option>
+                <option value="1">Subsector (0810)</option>
+              </select>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <input type="hidden" name="options" value="9207">
+        <input type="hidden" name="routes" value="1">
+        <label><input type="checkbox" id="options-sector-names" checked>Sector/Subsector Names</label><br>
+        <label><input type="checkbox" id="options-grid" checked>Subsector Grid</label><br>
+        <label><input type="checkbox" id="options-routes" checked>Routes</label><br>
+        <label><input type="checkbox" id="options-names" checked>Labels</label><br>
+        <label><input type="checkbox" id="options-borders" checked>Borders</label><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" id="options-filled-borders"> Filled</label><br>
+        <label><input type="checkbox" id="options-force-hexes" checked>Force Hexes</label><br>
+        <label><input type="checkbox" id="options-world-colors">World Colors</label>
+        <script>
+        (function() {
+          var $ = function(s) { return document.querySelector(s); };
+          var o = Traveller.MapOptions;
+          bindCheckboxToOptionsBitmap('#options-grid', o.GridMask);
+          bindCheckboxToOptionsBitmap('#options-borders', o.BordersMask);
+          bindCheckboxToOptionsBitmap('#options-sector-names', o.SectorsMask);
+          bindCheckboxToOptionsBitmap('#options-names', o.NamesMask);
+          bindCheckboxToBooleanOption('#options-routes', 'routes');
+          bindCheckboxToOptionsBitmap('#options-force-hexes', o.ForceHexes);
+          bindCheckboxToOptionsBitmap('#options-world-colors', o.WorldColors);
+          bindCheckboxToOptionsBitmap('#options-filled-borders', o.FilledBorders);
+          makeCheckboxDependent('#options-filled-borders', '#options-borders');
+          function bindCheckboxToOptionsBitmap(selector, mask) {
+            $(selector).addEventListener('click', function(e) {
+              var state = e.target.checked;
+              var input = $('input[name="options"]');
+              var options = Number(input.value);
+              options = state ? (options | mask) : (options & ~mask);
+              input.value = options;
+            });
+          }
+          function bindCheckboxToBooleanOption(selector, name) {
+            $(selector).addEventListener('click', function(e) {
+              var state = e.target.checked;
+              var input = $('input[name="' + name + '"]');
+              input.value = state ? 1 : 0;
+            });
+          }
+          function makeCheckboxDependent(dependent, master) {
+            $(master).addEventListener('click', function(e) {
+              if (!e.target.checked)
+                $(dependent).checked = false;
+            });
+          }
+        }());
+        </script>
+    </tr>
+  </table>
+  <div style="margin-top: 15px">
+    <input id="previewBtn" type="submit" value="Quick Preview">
+    <input id="renderBtn" type="submit" value="Render Poster">
+  </div>
+  <div style="margin-top: 15px">
+    Jump Map:
+    J-<input type="number" name="jump" min="0" max="6" value="3">
+    Hex: <input type="text" name="hex" size=4  value="" placeholder="XXYY">
+    <input id="jumpBtn" type="submit" value="Render Jump Map">
+  </div>
+  <input id="thumb" type="hidden" name="thumb" value="">
+</form>
+
+<div style="margin-top: 10px; font-size: 80%">
+  The <em class="product">Traveller</em> game in all forms is owned by Far
+  Future Enterprises. Copyright &copy; 1977 &ndash; 2015 Far Future
+  Enterprises.
+  <a href="http://farfuture.net/FFEFairUsePolicy2008.pdf">Fair Use Policy</a>
+</div>
+
+</div>
+
+<script>
+(function() {
+  var $ = function(s) { return document.querySelector(s); };
+
+  $('#previewBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var form = $('#form');
+    form.target = 'iframe';
+    form.action = Traveller.MapService.makeURL('/api/poster');
+    $('#thumb').value = '1';
+    var accept = $('#accept').value;
+    $('#accept').value = '';
+    form.submit();
+    $('#thumb').value = '';
+    $('#accept').value = accept;
+  });
+
+  $('#renderBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var form = $('#form');
+    form.target = '_blank';
+    form.action = Traveller.MapService.makeURL('/api/poster');
+    form.submit();
+  });
+
+  $('#jumpBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var form = $('#form');
+    form.target = '_blank';
+    form.action = Traveller.MapService.makeURL('/api/jumpmap');
+    form.submit();
+  });
+}());
+</script>
+
+<style>
+#preview {
+  position: absolute;
+  z-index: 1;
+  right: 10px; top: 10px; width: 450px; height: 651px;
+  border: 1px solid black;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAABlBMVEUAAAAoKCj70ajHAAAAE0lEQVQI12P4/5+BgZoEA3VNBADtvT/BrQ+bEwAAAABJRU5ErkJggg==');
+}
+#iframe {
+  width: 100%; height: 100%; border: none;
+}
+</style>
+
+<div id="preview"><iframe name="iframe" id="iframe"></iframe></div>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-18610679-2', 'auto');
+  ga('send', 'pageview');
+</script>

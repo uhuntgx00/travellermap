@@ -3,31 +3,6 @@
 
   var $ = function(s) { return document.querySelector(s); };
 
-  function fetch(url) {
-    return new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest(), async = true;
-      xhr.open('GET', url, async);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== XMLHttpRequest.DONE)
-          return;
-        if (xhr.status === 200)
-          resolve(xhr.responseText);
-        else
-          reject(xhr.statusText);
-      };
-      xhr.send();
-    });
-  }
-
-  function makeQuery(obj) {
-    return Object.keys(obj).map(function(key) {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
-    }).join('&');
-  }
-
-  function fromEHex(c) {
-    return '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'.indexOf(c.toUpperCase());
-  }
   function numberWithCommas(x) {
     return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
@@ -60,11 +35,12 @@
     8: '12,800km',
     9: '14,400km',
     A: '16,000km',
-    B: 'Exceptional', // Non-standard
-    C: 'Exceptional', // "
-    D: 'Exceptional', // "
-    E: 'Exceptional', // "
-    F: 'Exceptional'  // "
+    B: '17,600km',
+    C: '19,200km',
+    D: '20,800km',
+    E: '22,400km',
+    F: '24,000km',
+    X: 'Unknown'
   };
 
   var ATM_TABLE = {
@@ -82,12 +58,13 @@
     B: 'Corrosive',
     C: 'Insidious',
     D: 'Dense, high',
-    E: 'Ellipsoid',
-    F: 'Thin, low'
+    E: 'Thin, low',
+    F: 'Unusual',
+    X: 'Unknown'
   };
 
   var HYD_TABLE = {
-    0: 'No water',
+    0: 'Desert World',
     1: '10%',
     2: '20%',
     3: '30%',
@@ -97,11 +74,12 @@
     7: '70%',
     8: '80%',
     9: '90%',
-    A: '100%'
+    A: 'Water World',
+    X: 'Unknown'
   };
 
   var POP_TABLE = {
-    0: 'Few or none',
+    0: 'Unpopulated',
     1: 'Tens',
     2: 'Hundreds',
     3: 'Thousands',
@@ -111,7 +89,13 @@
     7: 'Tens of millions',
     8: 'Hundreds of millions',
     9: 'Billions',
-    A: 'Tens of billions'
+    A: 'Tens of billions',
+    B: 'Hundreds of billions',
+    C: 'Trillions',
+    D: 'Tens of trillions',
+    E: 'Hundreds of tillions',
+    F: 'Quadrillions',
+    X: 'Unknown'
   };
 
   var GOV_TABLE = {
@@ -131,6 +115,9 @@
     D: 'Religious Dictatorship',
     E: 'Religious Autocracy',
     F: 'Totalitarian Oligarchy',
+    X: 'Unknown',
+
+    // Legacy/Non-Human
     G: 'Small Station or Facility',
     H: 'Split Clan Control',
     J: 'Single On-world Clan Control',
@@ -144,8 +131,9 @@
     S: 'Sept',
     T: 'Unsupervised Anarchy',
     U: 'Supervised Anarchy',
-    W: 'Committee',
-    X: 'Droyne Hierarchy'
+    W: 'Committee'
+    //X: 'Droyne Hierarchy' // Need a hack for this
+
   };
 
   var LAW_TABLE = {
@@ -170,7 +158,8 @@
     J: 'Routinely oppressive and restrictive',
     K: 'Excessively oppressive and restrictive',
     L: 'Totally oppressive and restrictive',
-    S: 'Special/Variable situation'
+    S: 'Special/Variable situation',
+    X: 'Unknown'
   };
 
   var TECH_TABLE = {
@@ -194,7 +183,8 @@
     H: 'Artificial Intelligence',
     J: 'Personal Disintegrators',
     K: 'Plastic Metals',
-    L: 'Comprehensible only as technological magic'
+    L: 'Comprehensible only as technological magic',
+    X: 'Unknown'
   };
 
   var NOBILITY_TABLE = {
@@ -234,6 +224,7 @@
     Pa: 'Pre-Agricultural',
     Ag: 'Agricultural',
     Na: 'Non-Agricultural',
+    Px: 'Prison, Exile Camp',
     Pi: 'Pre-Industrial',
     In: 'Industrialized',
     Po: 'Poor',
@@ -253,7 +244,6 @@
     Fa: 'Farming',
     Mi: 'Mining',
     Mr: 'Military Rule',
-    Px: 'Prison, Exile Camp',
     Pe: 'Penal Colony',
     Re: 'Reserve',
 
@@ -270,8 +260,8 @@
     Da: 'Danger',
     Ab: 'Data Repository',
     An: 'Ancient Site',
-    Rs: 'Research Station',
 
+    Rs: 'Research Station',
     RsA: 'Research Station Alpha',
     RsB: 'Research Station Beta',
     RsG: 'Research Station Gamma',
@@ -309,26 +299,52 @@
     [ /^\[.*\]$/, 'Homeworld'],
     [ /^\(.*\)$/, 'Homeworld'],
     [ /^\(.*\)(\d)$/, 'Homeworld, Population $1$`0%'],
+    [ /^[A-Z][A-Za-z']{3}0$/, 'Sophont, Population < 10%'],
+    [ /^[A-Z][A-Za-z']{3}([1-9])$/, 'Sophont, Population $1$`0%'],
+    [ /^[A-Z][A-Za-z']{3}W$/, 'Sophont, Population 100%'],
+
+    // Comments
+    [ /^\{.*\}$/, '']
+  ];
+
+  // Legacy Sophont Codes (Aw, A#)
+  [
+    ['A', 'Aslan'],
+    ['C', 'Chirper'],
+    ['D', 'Droyne'],
+    ['F', 'Non-Hiver'],
+    ['H', 'Hiver'],
+    ['I', 'Ithklur'],
+    ['M', 'Human'],
+    ['V', 'Vargr'],
+    ['X', 'Addaxur'],
+    ['Z', 'Zhodani']
+  ].forEach(function(pair) {
     [ /^\w\w\w\w0$/, 'Sophont, Population < 10%'],
     [ /^\w\w\w\w([1-9])$/, 'Sophont, Population $1$`0%'],
-    [ /^\w\w\w\wW$/, 'Sophont, Population 100%']
-  ];
+    REMARKS_PATTERNS.push([
+      new RegExp('^' + pair[0] + '0$'), pair[1] + ', Population < 10%']);
+    REMARKS_PATTERNS.push([
+      new RegExp('^' + pair[0] + '([1-9])$'), pair[1] + ', Population $1$`0%']);
+    REMARKS_TABLE[pair[0] + 'w'] = pair[1] + ' World';
+  });
 
   var BASE_TABLE = {
     C: 'Corsair Base',
     D: 'Naval Depot',
-    E: 'Embassy Center',
+    E: 'Embassy',
     K: 'Naval Base',
-    L: 'Naval Base',
+    L: 'Naval Base', // Obsolete
     M: 'Military Base',
     N: 'Naval Base',
-    O: 'Naval Outpost',
+    O: 'Naval Outpost', // Obsolete
     R: 'Clan Base',
     S: 'Scout Base',
     T: 'Tlauku Base',
-    W: 'Scout Way Station',
-    X: 'Relay Station',
-    Z: 'Naval/Military Base'
+    V: 'Exploration Base',
+    W: 'Way Station',
+    X: 'Relay Station', // Obsolete
+    Z: 'Naval/Military Base' // Obsolete
   };
 
   function splitUWP(uwp) {
@@ -344,10 +360,12 @@
     };
   }
   function splitPBG(pbg) {
+    if (pbg === 'XXX')
+      return { Pop: -1, Belts: '???', GG: '???' };
     return {
-      Pop: fromEHex(pbg.substring(0, 1)),
-      Belts: fromEHex(pbg.substring(1, 2)),
-      GG: fromEHex(pbg.substring(2, 3))
+      Pop: Traveller.fromHex(pbg.substring(0, 1)),
+      Belts: Traveller.fromHex(pbg.substring(1, 2)),
+      GG: Traveller.fromHex(pbg.substring(2, 3))
     };
   }
 
@@ -355,22 +373,25 @@
     var world = data.Worlds[0];
     if (!world) return;
 
+    var isPlaceholder = world.UWP === 'XXXXXXX-X';
+
     world.UWP = splitUWP(world.UWP);
     world.UWP.StarportBlurb = STARPORT_TABLE[world.UWP.Starport];
     world.UWP.SizBlurb = SIZ_TABLE[world.UWP.Siz];
     world.UWP.AtmBlurb = ATM_TABLE[world.UWP.Atm];
     world.UWP.HydBlurb = HYD_TABLE[world.UWP.Hyd];
     world.UWP.PopBlurb = POP_TABLE[world.UWP.Pop];
-    world.UWP.GovBlurb = GOV_TABLE[world.UWP.Gov];
+    world.UWP.GovBlurb = isPlaceholder ? 'Unknown' : GOV_TABLE[world.UWP.Gov];
     world.UWP.LawBlurb = LAW_TABLE[world.UWP.Law];
     world.UWP.TechBlurb = TECH_TABLE[world.UWP.Tech];
 
     world.PBG = splitPBG(world.PBG);
     world.PopMult = world.PBG.Pop;
-    world.PopExp  = fromEHex(world.UWP.Pop);
+    world.PopExp  = Traveller.fromHex(world.UWP.Pop);
     if (world.PopExp > 0 && world.PopMult === 0)
       world.PopMult = 1;
-    world.TotalPopulation = numberWithCommas(world.PopMult * Math.pow(10, world.PopExp));
+    if (world.PopExp >= 0 && world.PopMult >= 0)
+      world.TotalPopulation = numberWithCommas(world.PopMult * Math.pow(10, world.PopExp));
 
     var UNICODE_MINUS = '\u2212'; // U+2212 MINUS SIGN
 
@@ -391,6 +412,10 @@
         Inf: ex.substring(2, 3),
         Eff: ex.substring(3)
       };
+      ['Res', 'Lab', 'Inf'].forEach(function(s) {
+        world.Ex[s + 'Blurb'] = Traveller.fromHex(world.Ex[s]);
+      });
+      world.Ex.EffBlurb = world.Ex.Eff;
     }
 
     if (world.Cx) {
@@ -401,6 +426,9 @@
         Str: cx.substring(2, 3),
         Sym: cx.substring(3, 4)
       };
+      ['Hom', 'Acc', 'Str', 'Sym'].forEach(function(s) {
+        world.Cx[s + 'Blurb'] = Traveller.fromHex(world.Cx[s]);
+      });
     }
 
     if (world.Nobility) {
@@ -410,7 +438,7 @@
     }
 
     if (world.Remarks) {
-      world.Remarks = world.Remarks.match(/\([^)]*\)\d*|\[[^\]]*\]\d*|\S+/g).map(function(s){
+      world.Remarks = world.Remarks.match(/\([^)]*\)\d*|\[[^\]]*\]\d*|{[^}]*}|\S+/g).map(function(s){
         if (s in REMARKS_TABLE) return {code: s, detail: REMARKS_TABLE[s]};
         for (var i = 0; i < REMARKS_PATTERNS.length; ++i) {
           var pattern = REMARKS_PATTERNS[i][0], replacement = REMARKS_PATTERNS[i][1];
@@ -440,8 +468,10 @@
       }
     }(world.Zone));
 
-    world.Worlds = Number(world.Worlds);
-    world.OtherWorlds = world.Worlds - 1 - world.PBG.Belts - world.PBG.GG;
+    if (world.Worlds) {
+      world.Worlds = Number(world.Worlds);
+      world.OtherWorlds = world.Worlds - 1 - world.PBG.Belts - world.PBG.GG;
+    }
 
     var template = Handlebars.compile($('#world-template').innerHTML);
     $('#world-data').innerHTML = template(world);
@@ -454,25 +484,31 @@
       window.history.replaceState(null, document.title, url);
     }
 
-    $('#world-image').classList.add('Hyd' + world.UWP.Hyd);
-    $('#world-image').classList.add('Siz' + world.UWP.Siz);
-    $('#world-image .disc').src = 'res/Candy/' +
-      (world.UWP.Siz === '0' ? 'Belt' : 'Hyd' + world.UWP.Hyd) + '.png';
+    if (isPlaceholder) {
+      $('#world-image').classList.add('unknown');
+    } else {
+      $('#world-image').classList.add('Hyd' + world.UWP.Hyd);
+      $('#world-image').classList.add('Siz' + world.UWP.Siz);
+      $('#world-image .disc').src = 'res/Candy/' +
+        (world.UWP.Siz === '0' ? 'Belt' : 'Hyd' + world.UWP.Hyd) + '.png';
+    }
     $('#world-image').style.display = 'block';
 
     // Try loading pre-rendered; if it works, use it instead.
-    var img = document.createElement('img');
-    img.src = 'res/Candy/worlds/' + encodeURIComponent(world.Sector + ' ' + world.Hex) + '.png';
-    img.onload = function() {
-      $('#world-image .disc').src = img.src;
-    };
+    if (!isPlaceholder) {
+      var img = document.createElement('img');
+      img.src = 'res/Candy/worlds/' + encodeURIComponent(world.Sector + ' ' + world.Hex) + '.png';
+      img.onload = function() {
+        $('#world-image .disc').src = img.src;
+      };
+    }
   }
 
   function renderNeighborhood(data) {
 
     // Make hi-pop worlds uppercase
     data.Worlds.forEach(function(world) {
-      var pop = fromEHex(splitUWP(world.UWP).Pop);
+      var pop = Traveller.fromHex(splitUWP(world.UWP).Pop);
       if (pop >= 9)
         world.Name = world.Name.toUpperCase();
     });
@@ -482,41 +518,48 @@
   }
 
   window.addEventListener('DOMContentLoaded', function() {
-    var query = (function(s) {
-      var q = {};
-      if (s) s.substring(1).split('&').forEach(function(pair) {
-        pair = pair.split('=');
-        q[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-      });
-      return q;
-    }(document.location.search));
+    var query = Util.parseURLQuery(document.location);
+
+    if ('nopage' in query)
+      document.body.classList.add('nopage');
 
     var prefix = (window.location.hostname === 'localhost'
                   && window.location.pathname.indexOf('~') !== -1) ?
           'http://travellermap.com' : '';
 
     var coords;
-    if ('sector' in query && 'hex' in query) {
+    if ('sector' in query && 'hex' in query)
       coords = {sector: query.sector, hex: query.hex};
-    } else if ('x' in query && 'y' in query) {
+    else if ('x' in query && 'y' in query)
       coords = {x: query.x, y: query.y};
-    } else {
+    else
       coords = {sector: 'spin', hex: '1910'};
-    }
 
-    fetch(prefix + '/api/coordinates?' + makeQuery(coords)).then(function(data) {
-      var coords = JSON.parse(data);
+    fetch(Util.makeURL(prefix + '/api/coordinates?', coords)).then(function(response) {
+      if (!response.ok) throw Error(response.text());
+      return response.json();
+    }).then(function(coords) {
       var JUMP = 2;
       var SCALE = 48;
 
-      return Promise.all([
-        fetch(prefix + '/api/jumpworlds?' + makeQuery({x: coords.x, y: coords.y, jump: 0}))
-          .then(function(data) {
-            renderWorld(JSON.parse(data));
-          }),
-        fetch(prefix + '/api/jumpworlds?' + makeQuery({x: coords.x, y: coords.y, jump: JUMP}))
-          .then(function(data) {
-            renderNeighborhood(JSON.parse(data));
+      var promises = [];
+      promises.push(
+        fetch(Util.makeURL(prefix + '/api/jumpworlds?', {x: coords.x, y: coords.y, jump: 0}))
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(json) {
+            renderWorld(json);
+          }));
+
+      if (!('nopage' in query)) promises.push(
+        fetch(Util.makeURL(prefix + '/api/jumpworlds?', {x: coords.x, y: coords.y, jump: JUMP}))
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(json) {
+            if (!('nohood' in query))
+              renderNeighborhood(json);
           })
           .then(function() {
             var mapParams = {
@@ -527,7 +570,7 @@
               border: 0};
             if (window.devicePixelRatio > 1)
               mapParams.dpr = window.devicePixelRatio;
-            $('#jumpmap').src = prefix + '/api/jumpmap?' + makeQuery(mapParams);
+            $('#jumpmap').src = Util.makeURL(prefix + '/api/jumpmap?', mapParams);
 
             $('#jumpmap').addEventListener('click', function(event) {
               var result = jmapToCoords(event, JUMP, SCALE, coords.x, coords.y);
@@ -535,9 +578,11 @@
                 window.location.search = '?x=' + result.x + '&y=' + result.y;
             });
           })
-      ]);
-    }).catch(function(reason) {
-      // TODO: Display error
+      );
+
+      return Promise.all(promises);
+    }, function(reason) {
+      console.error(reason);
     });
   });
 

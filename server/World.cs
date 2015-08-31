@@ -33,19 +33,14 @@ namespace Maps
 
         public string Hex
         {
-            get { return (X * 100 + Y).ToString("0000", CultureInfo.InvariantCulture); }
-            set { int hex = Int32.Parse(value, CultureInfo.InvariantCulture); X = hex / 100; Y = hex % 100; }
+            get { return Astrometrics.IntToHex(X * 100 + Y); }
+            set { int hex = Astrometrics.HexToInt(value); X = hex / 100; Y = hex % 100; }
         }
 
         [XmlIgnore,JsonIgnore]
         public string SubsectorHex
         {
-            get
-            {
-                return
-                    (((X - 1) % 8 + 1) * 100 +
-                    ((Y - 1) % 10 + 1)).ToString("0000", CultureInfo.InvariantCulture);
-            }
+            get { return Astrometrics.IntToHex(((X - 1) % Astrometrics.SubsectorWidth + 1) * 100 + ((Y - 1) % Astrometrics.SubsectorHeight + 1)); }
         }
 
         [XmlElement("UWP"),JsonName("UWP")]
@@ -62,7 +57,7 @@ namespace Maps
             }
         }
         private string m_zone;
-        
+
         public string Bases { get; set; }
         public string Allegiance { get; set; }
         public string Stellar { get; set; }
@@ -78,6 +73,25 @@ namespace Maps
 
         [XmlElement("Ix"), JsonName("Ix")]
         public string Importance { get; set; }
+
+        [XmlIgnore, JsonIgnore]
+        public int? ImportanceValue
+        {
+            get
+            {
+                int? value = null;
+                int tmp;
+                string ix = Importance;
+                if (!String.IsNullOrWhiteSpace(ix) && Int32.TryParse(ix.Replace('{', ' ').Replace('}', ' '),
+                    NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.Integer,
+                    CultureInfo.InvariantCulture, out tmp))
+                {
+                    value = tmp;
+                }
+                return value;
+            }
+        }
+
         [XmlElement("Ex"), JsonName("Ex")]
         public string Economic { get; set; }
         [XmlElement("Cx"), JsonName("Cx")]
@@ -115,7 +129,7 @@ namespace Maps
             get
             {
                 if (this.Sector == null)
-                    throw new Exception("Can't get coordinates for a world not assigned to a sector");
+                    throw new InvalidOperationException("Can't get coordinates for a world not assigned to a sector");
 
                 return Astrometrics.LocationToCoordinates(this.Sector.Location, this.Location);
             }
@@ -154,7 +168,7 @@ namespace Maps
                 return mantissa;
             }
         }
-        
+
         [XmlIgnore, JsonIgnore]
         public int Belts { get { return SecondSurvey.FromHex(PBG[1]); } }
 
@@ -258,7 +272,7 @@ namespace Maps
         // "[Sophont]" - major race homeworld
         // "(Sophont)" - minor race homeworld
         // "(Sophont)0" - minor race homeworld (population in tenths)
-        // "{comment ... }" - arbirary comment
+        // "{comment ... }" - arbitrary comment
         // "xyz" - other code
         private static Regex codeRegex = new Regex(@"(\(.*?\)\S*|\[.*?\]\S*|\{.*?\}\S*|\S+)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         public string Remarks
@@ -276,7 +290,7 @@ namespace Maps
         [XmlIgnore, JsonIgnore]
         public IEnumerable<string> Codes { get { return m_codes; } }
 
-        private ListHashSet<string> m_codes = new ListHashSet<string>();
+        private OrderedHashSet<string> m_codes = new OrderedHashSet<string>();
 
         public string LegacyBaseCode
         {

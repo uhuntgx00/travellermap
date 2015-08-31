@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<title>Second Survey Data Definitions</title>
+﻿<!DOCTYPE html>
+<title>Second Survey Data Definitions - Traveller Map</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="../favicon.ico">
 <link rel="stylesheet" href="../site.css">
 <meta name="viewport" content="initial-scale=1, width=device-width">
+<script src="../lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
 
 <style>
   table {
@@ -80,11 +81,13 @@
 <div class="content">
 
   <div id="intro">
-    <p>The <cite>Traveller<sup>5</sup> Second Survey</cite> format defines a standard for
-      describing star systems in the <cite>Official Traveller Universe</cite>. It is composed
-      of a series of fields describing various aspects of the Main World (MW) in each system
-      including physical and cultural characteristics, and some details about other bodies
-      in the system of interest to travellers.
+    <p>The <cite>Traveller<sup>5</sup> Second Survey</cite> format
+      defines a standard for describing star systems in
+      the <cite>Official Traveller Universe</cite>. It is composed of
+      a series of fields describing various aspects of the Main World
+      (MW) in each system including physical and cultural
+      characteristics, and some details about other bodies in the
+      system of interest to travellers.
     </p>
     <p>
       The data for Regina (Spinward Marches 1910), home of Duke Norris and
@@ -93,10 +96,11 @@
     </p>
     <div class="example"><code><a href="#hex">1910</a> <a href="#name">Regina</a> <a href="#uwp">A788899-C</a> <a href="#remarks">Ri Pa Ph An Cp (Amindii)2</a>   <a href="#ix">{ 4 }</a>  <a href="#ex">(D7E+4)</a> <a href="#cx">[9C6D]</a> <a href="#nobility">BcCeF</a> <a href="#bases">NS</a> <a href="#zone">-</a> <a href="#pbg">703</a> <a href="#worlds">8</a> <a href="#allegiance">ImDd</a> <a href="#stellar">F7 V BD M3 V</a></code></div>
     <p class="aside">
-      Different editions of <cite>Traveller</cite> and different authors and publications may include
-      different fields, present the fields in different orders, or provide different values for fields.
-      The companion document <a href="fileformats">Sector Data File Formats</a>
-      may be used for reference.
+      Different editions of <cite>Traveller</cite> and different
+      authors and publications may include different fields, present
+      the fields in different orders, or provide different values for
+      fields. The companion document <a href="fileformats">Sector Data
+      File Formats</a> may be used for reference.
     </p>
   </div>
 
@@ -133,9 +137,12 @@
     <h2>Hex Location</h2>
     <div class="example"><code><span class="highlight">1910</span> Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The hexagon location of the world within a sector, given as a four digit number. The first
-      two digits are the distance from the spinward edge in parsecs ranging from <code>01</code> through <code>32</code>.
-      The second two digits are the distance from the coreward edge in parsecs ranging from <code>01</code> through <code>40</code>.
+      The hexagon location of the world within a sector, given as a
+      four digit number. The first two digits are the distance from
+      the spinward edge in parsecs ranging from <code>01</code>
+      through <code>32</code>. The second two digits are the distance
+      from the coreward edge in parsecs ranging from <code>01</code>
+      through <code>40</code>.
     </p>
   </section>
 
@@ -143,8 +150,9 @@
     <h2>Main World Name</h2>
     <div class="example"><code>1910 <span class="highlight">Regina</span> A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      Name of the primary world in the system. Most characteristics given in the UWP, such as physical and cultural
-      attributes, refer to this world.
+      Name of the primary world in the system. Most characteristics
+      given in the UWP, such as physical and cultural attributes,
+      refer to this world.
     </p>
   </section>
 
@@ -152,9 +160,9 @@
     <h2>UWP - Universal World Profile</h2>
     <div class="example"><code>1910 Regina <span class="highlight">A788899-C</span> Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The UWP gives a compact description of the physical and cultural aspects of the
-      main world, as well the starport facilities and available technology.
-      The fields are respectively:
+      The UWP gives a compact description of the physical and cultural
+      aspects of the main world, as well the starport facilities and
+      available technology. The fields are respectively:
     </p>
     <table>
       <tr>
@@ -200,7 +208,7 @@
       <div class="example"><code>1910 Regina <span class="highlight">A</span>788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
         Starport indicates the best quality starport in the star
-system.
+        system.
       </p>
       <table>
         <tr>
@@ -209,35 +217,50 @@ system.
 
           <tr>
             <td><code>A</code>
-            <td>Excellent Quality. Refined fuel available. Annual maintenance overhaul available. Shipyard capable of
-constructing starships and non-starships present. Nava base and/or scout base may be present.
+            <td>
+              Excellent Quality. Refined fuel available. Annual
+              maintenance overhaul available. Shipyard capable of
+              constructing starships and non-starships present. Nava
+              base and/or scout base may be present.
 
         <tr>
           <td><code>B</code>
-          <td>Good Quality. Refined fuel available. Annual maintenance overhaul available. Shipyard capable of
-constructing non-starships present. Naval base and/or scout base may be present.
+          <td>
+            Good Quality. Refined fuel available. Annual maintenance
+            overhaul available. Shipyard capable of constructing
+            non-starships present. Naval base and/or scout base may be
+            present.
 
         <tr>
           <td><code>C</code>
-          <td>Routine Quality. Only unrefined fuel available. Reasonable repair facilities present. Scout base may be present.
+          <td>
+            Routine Quality. Only unrefined fuel available. Reasonable
+            repair facilities present. Scout base may be present.
 
         <tr>
           <td><code>D</code>
-          <td>Poor Quality. Only unrefined fuel available. No repair facilities present. Scout base may be present.
+          <td>
+            Poor Quality. Only unrefined fuel available. No repair
+            facilities present. Scout base may be present.
 
         <tr>
           <td><code>E</code>
-          <td>Frontier Installation. Essentially a marked spot of bedrock with no fuel, facilities, or bases present.
+          <td>
+            Frontier Installation. Essentially a marked spot of
+            bedrock with no fuel, facilities, or bases present.
 
         <tr>
           <td><code>X</code>
-          <td>No Starport. No provision is made for any ship landings.
+          <td>
+            No Starport. No provision is made for any ship landings.
 
       </table>
 
       <h3>Spaceports</h3>
-      <p>Worlds other than the Main World in a system may also be described by UWP codes. The
-        port, if any, is referred to as a <dfn>spaceport</dfn>.
+      <p>
+        Worlds other than the Main World in a system may also be
+        described by UWP codes. The port, if any, is referred to as
+        a <dfn>spaceport</dfn>.
       </p>
 
       <table>
@@ -264,11 +287,12 @@ constructing non-starships present. Naval base and/or scout base may be present.
       <h3>Size</h3>
       <div class="example"><code>1910 Regina A<span class="highlight">7</span>88899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        Size expresses the diameter of a world in approximately 1,600 km units (or
-1,000 mile units).
+        Size expresses the diameter of a world in approximately
+        1,600km units (or 1,000 mile units).
       </p>
-      <p>Size code <code>0</code> indicates that the main "world" of the system is an
-        asteroid belt.
+      <p>
+        Size code <code>0</code> indicates that the main "world" of
+        the system is an asteroid belt.
       </p>
       <table>
         <tr>
@@ -372,8 +396,8 @@ constructing non-starships present. Naval base and/or scout base may be present.
       <h3>Atmosphere</h3>
       <div class="example"><code>1910 Regina A7<span class="highlight">8</span>8899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        Atmosphere type shows the general character of the
-atmosphere for a world on its surface.
+        Atmosphere type shows the general character of the atmosphere
+        for a world on its surface.
       </p>
       <table>
         <tr>
@@ -391,8 +415,9 @@ atmosphere for a world on its surface.
 
         <tr>
           <td><code>2</code>
-          <td>Very thin. Tainted. Requires
-combination respirator/filter.
+          <td>
+            Very thin. Tainted. Requires combination
+            respirator/filter.
 
         <tr>
           <td><code>3</code>
@@ -400,8 +425,7 @@ combination respirator/filter.
 
         <tr>
           <td><code>4</code>
-          <td>Thin. Tainted. Requires filter
-mask.
+          <td>Thin. Tainted. Requires filter mask.
 
         <tr>
           <td><code>5</code>
@@ -413,8 +437,7 @@ mask.
 
         <tr>
           <td><code>7</code>
-          <td>Standard. Tainted. Requires filter
-mask.
+          <td>Standard. Tainted. Requires filter mask.
 
         <tr>
           <td><code>8</code>
@@ -422,38 +445,31 @@ mask.
 
         <tr>
           <td><code>9</code>
-          <td>Dense. Tainted. Requires filter
-mask.
+          <td>Dense. Tainted. Requires filter mask.
 
         <tr>
           <td><code>A</code>
-          <td>Exotic. Requires special
-protective equipment.
+          <td>Exotic. Requires special protective equipment.
 
         <tr>
           <td><code>B</code>
-          <td>Corrosive. Requires protective
-suit.
+          <td>Corrosive. Requires protective suit.
 
         <tr>
           <td><code>C</code>
-          <td>Insidious. Requires protective
-suit.
+          <td>Insidious. Requires protective suit.
 
         <tr>
           <td><code>D</code>
-          <td>Dense, high. Breathable above a
-minimum altitude.
+          <td>Dense, high. Breathable above a minimum altitude.
 
         <tr>
           <td><code>E</code>
-          <td>Ellipsoid. Breathable at certain
-latitudes.
+          <td>Ellipsoid. Breathable at certain latitudes.
 
         <tr>
           <td><code>F</code>
-          <td>Thin, low. Breathable below certain
-altitudes.
+          <td>Thin, low. Breathable below certain altitudes.
 
       </table>
     </section>
@@ -461,8 +477,9 @@ altitudes.
       <h3>Hydrographics</h3>
       <div class="example"><code>1910 Regina A78<span class="highlight">8</span>899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        Hydrographics shows the percentage of world surface covered by seas or oceans.
-        If atmosphere type is <code>A</code> or above, fluid may be present in place of water.
+        Hydrographics shows the percentage of world surface covered by
+        seas or oceans. If atmosphere type is <code>A</code> or above,
+        fluid may be present in place of water.
       </p>
       <table>
         <tr>
@@ -500,8 +517,7 @@ altitudes.
 
         <tr>
           <td><code>7</code>
-          <td>70% water. Equivalent to Terra or
-Vland.
+          <td>70% water. Equivalent to Terra or Vland.
 
         <tr>
           <td><code>8</code>
@@ -521,9 +537,10 @@ Vland.
       <h3>Population Exponent</h3>
       <div class="example"><code>1910 Regina A788<span class="highlight">8</span>99-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        The population exponent gives an order-of-magnitude approximation of a world's population.
-         Together with the population multiplier digit in
-  the <a href="#pbg">PBG</a> field, the world population can be computed as:
+        The population exponent gives an order-of-magnitude
+         approximation of a world's population. Together with the
+         population multiplier digit in the <a href="#pbg">PBG</a>
+         field, the world population can be computed as:
       </p>
 
       <p class="equation">
@@ -539,7 +556,7 @@ Vland.
 
           <tr>
             <td><code>0</code>
-  <td>Few or no inhabitants.
+            <td>Few or no inhabitants.
 
  <tr>
    <td><code>1</code>
@@ -591,9 +608,11 @@ Vland.
         Government shows the basic governmental structure for a world.
       </p>
       <p class="aside">
-        Codes <code>G</code> and above were defined in the <cite>Classic Traveller</cite> alien
-        modules for sophont-specific govenment types. Other editions of <cite>Traveller</cite>
-        may define other values for certain codes.
+        Codes <code>G</code> and above were defined in
+        the <cite>Classic Traveller</cite> alien modules for
+        sophont-specific govenment types. Other editions
+        of <cite>Traveller</cite> may define other values for certain
+        codes.
       </p>
       <table>
         <tr>
@@ -776,7 +795,8 @@ Vland.
       <h3>Law Level</h3>
       <div class="example"><code>1910 Regina A78889<span class="highlight">9</span>-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        Law level indicates basic legal status and shows probability of harassment by local enforcers.
+        Law level indicates basic legal status and shows probability
+        of harassment by local enforcers.
       </p>
       <table>
         <tr>
@@ -889,7 +909,8 @@ Vland.
       <h3>Technological Level</h3>
       <div class="example"><code>1910 Regina A788899-<span class="highlight">C</span> Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
       <p>
-        Technological level shows the degree of technological sophistication to be expected on a world.
+        Technological level shows the degree of technological
+        sophistication to be expected on a world.
       </p>
       <table>
         <tr>
@@ -1000,9 +1021,9 @@ Vland.
     <div class="example"><code>1910 Regina A788899-C <span class="highlight">Ri Pa Ph An Cp (Amindii)2</span>   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
       Remarks and trade classifications indicate obvious or important
-characteristics for the main world in the system. They serve to show the
-potential for a world based on its capacity as a source of trade goods, a
-market for trade goods, or both.
+      characteristics for the main world in the system. They serve to
+      show the potential for a world based on its capacity as a source
+      of trade goods, a market for trade goods, or both.
     </p>
 
     <table id="remarks-table">
@@ -1088,11 +1109,11 @@ market for trade goods, or both.
       <tr><td><code>[<var>Sophont</var>]</code><td>Homeworld of major race.
       <tr><td><code>(<var>Sophont</var>)</code><td rowspan="2">Homeworld of minor race.  <code>0</code>-<code>9</code> indicates tenths of population if &lt; 100%.
       <tr><td><code>(<var>Sophont</var>)0</code>
-      <tr><td><code><var>Soph</var>0</code><td rowspan="2">Sophont Population. <code>Soph</code> is abbreviation for the sophont name. <code>0</code>-<code>9</code> indicates tenths of population; <code>W</code> is 100%, e.g. <code>DroyW</code>.
+      <tr><td><code><var>Soph</var>0</code><td rowspan="2">Sophont Population. <code>Soph</code> is an <a href="#sophont">abbreviation for the sophont name</a>. <code>0</code>-<code>9</code> indicates tenths of population; <code>W</code> is 100%, e.g. <code>DroyW</code>.
       <tr><td><code><var>Soph</var>W</code>
       <tr><th colspan="2" class="section">Non-Standard / Legacy Codes
 
-      <tr><td><code><var>S</var>0</code><td rowspan="3">Sophont Population. <code>S</code> is abbreviation for the sophont name. <code>0</code>-<code>9</code> indicates tenths of population; <code>w</code> is 100%, e.g. <code>Dw</code>
+      <tr><td><code><var>S</var>0</code><td rowspan="3">Sophont Population. <code>S</code> is an <a href="#sophont">abbreviation for the sophont name</a>. <code>0</code>-<code>9</code> indicates tenths of population; <code>w</code> is 100%, e.g. <code>Dw</code>
       <tr><td><code><var>S</var>:0</code>
       <tr><td><code><var>S</var>w</code>
       <tr><td><code>Nh</code><td>Non-Hiver Population.<span>Hiver.</span>
@@ -1110,6 +1131,85 @@ market for trade goods, or both.
       <tr><td><code>Xb</code><td>Xboat Station.<span>Imperial.</span>
     </table>
 
+    <section id="sophont">
+      <h3>Sophont Codes</h3>
+
+      <p>
+        Notable populations of sophonts are present in the
+        <a href="#remarks">Remarks</a>
+        section. The species of sophont is identified using codes
+        defined below.
+      </p>
+
+    <h3><cite>Traveller<sup>5</sup></cite></h3>
+
+    <p>
+      The sophont code is a 4-character code which is selected to
+      uniquely identify a sophont species in Charted Space.
+    </p>
+
+    <table>
+      <tr><th>Code<th>Sophont<th>Location
+        <!-- Sophont Table Begin -->
+      <tr><td><code>Adda</code><td>Addaxur<td>Zhodani space
+      <tr><td><code>Akee</code><td>Akeed<td>Gate
+      <tr><td><code>Aqua</code><td>Aquans (Daga)/Aquamorphs (Alph)<td>Daga (Aquans)/&#x200B;Alph (Aquamorphs)
+      <tr><td><code>Asla</code><td>Aslan<td>major
+      <tr><td><code>Bhun</code><td>Brunj<td>Forn
+      <tr><td><code>Bruh</code><td>Bruhre<td>Daib/&#x200B;Reav
+      <tr><td><code>Buru</code><td>Burugdi<td>Dagu/&#x200B;Thet
+      <tr><td><code>Bwap</code><td>Bwaps<td>Imperial/&#x200B;Vilani space
+      <tr><td><code>Chir</code><td>Chirpers<td>major
+      <tr><td><code>Darm</code><td>Darmine<td>Zaru
+      <tr><td><code>Dary</code><td>Daryen<td>Spin
+      <tr><td><code>Dolp</code><td>Dolphins<td>Imperial/&#x200B;Solomani space
+      <tr><td><code>Droy</code><td>Droyne<td>major
+      <tr><td><code>Esly</code><td>Eslyat<td>Beyo/&#x200B;Vang
+      <tr><td><code>Flor</code><td>Floriani<td>Beyo/&#x200B;Troj
+      <tr><td><code>Gnii</code><td>Gniivi<td>Hint
+      <tr><td><code>Gray</code><td>Graytch<td>Dagu/&#x200B;Gush/&#x200B;Ilel
+      <tr><td><code>Guru</code><td>Gurungan<td>Solo
+      <tr><td><code>Hama</code><td>Hamaran<td>Dagu
+      <tr><td><code>Hive</code><td>Hiver<td>Hiver space
+      <tr><td><code>Huma</code><td>Human (Vilani/Solomani-mixed)<td>Imperial/&#x200B;Solomani space
+      <tr><td><code>Jala</code><td>Jala'lak<td>Dagu
+      <tr><td><code>Jend</code><td>Jenda<td>Hint
+      <tr><td><code>Jonk</code><td>Jonkeereen<td>Dene/&#x200B;Spin
+      <tr><td><code>Kafo</code><td>Kafoe<td>Cruc
+      <tr><td><code>Karh</code><td>Karhyri<td>Cruc
+      <tr><td><code>Kiak</code><td>Kiakh'iee<td>Dagu
+      <tr><td><code>Lamu</code><td>Lamura Gav/Teg<td>Hint
+      <tr><td><code>Lanc</code><td>Lancians<td>Dagu/&#x200B;Gush
+      <tr><td><code>Luri</code><td>Luriani<td>Forn/&#x200B;Ley
+      <tr><td><code>Mask</code><td>Maskai<td>Glim
+      <tr><td><code>Muri</code><td>Murians<td>Vang
+      <tr><td><code>Orca</code><td>Orca<td>Imperial/&#x200B;Solomani space
+      <tr><td><code>Ormi</code><td>Ormine<td>Dark
+      <tr><td><code>Scan</code><td>Scanians<td>Dagu
+      <tr><td><code>Sele</code><td>Selenites<td>Alph
+      <tr><td><code>Sred</code><td>Sred*Ni<td>Beyo
+      <tr><td><code>Stal</code><td>Stalkers<td>Hint
+      <tr><td><code>Swan</code><td>Swanfei<td>Gate
+      <tr><td><code>Sydi</code><td>Sydites<td>Ley
+      <tr><td><code>Syle</code><td>Syleans<td>Core
+      <tr><td><code>Tapa</code><td>Tapazmal<td>Reft
+      <tr><td><code>Tent</code><td>Tentrassi<td>Zaru
+      <tr><td><code>Tlye</code><td>Tlyetrai<td>Reav
+      <tr><td><code>UApe</code><td>Uplifted Apes<td>Imperial/&#x200B;Solomani space
+      <tr><td><code>Ulan</code><td>Ulane<td>Dark
+      <tr><td><code>Ursa</code><td>Ursa<td>Forn/&#x200B;Ley
+      <tr><td><code>Urun</code><td>Urunishani<td>Anta
+      <tr><td><code>Varg</code><td>Vargr<td>Anta/&#x200B;Corr/&#x200B;Dagu/&#x200B;Dene/&#x200B;Empt/&#x200B;Ley/&#x200B;Lish/&#x200B;Spin/&#x200B;Vargr space
+      <tr><td><code>Vega</code><td>Vegans<td>Solo
+      <tr><td><code>Zhod</code><td>Zhodani<td>Zhodani space
+      <tr><td><code>Ziad</code><td>Ziadd<td>Dagu
+        <!-- Sophont Table End -->
+    </table>
+
+    <h3>
+      <cite>Classic Traveller</cite>, <cite>MegaTraveller</cite>, <cite>Traveller: The New Era</cite>, <cite>Traveller: 4th Edition</cite>
+    </h3>
+
     <p>
       Legacy sophont abbreviations include:
       <code>A</code> = Aslan,
@@ -1125,13 +1225,15 @@ market for trade goods, or both.
     </p>
 
   </section>
+  </section>
 
   <section id="ix" class="t5">
     <h2>Importance Extension</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   <span class="highlight">{ 4 }</span>  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The Importance Extension is abbreviated Ix and written in braces (<code>{}</code>).
-      It is a decimal integer (positive, negative, or zero) ranking the importance of the world within a region.
+      The Importance Extension is abbreviated Ix and written in braces
+      (<code>{}</code>). It is a decimal integer (positive, negative,
+      or zero) ranking the importance of the world within a region.
     </p>
   </section>
 
@@ -1139,10 +1241,13 @@ market for trade goods, or both.
     <h2>Economic Extension</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  <span class="highlight">(D7E+4)</span> [9C6D] BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The Economic Extension is abbreviated Ex and written in parentheses (<code>()</code>).
-      It describes the strength of a world's economy. It is given as three <a href="#ehex">eHex</a>
-      digits representing <dfn>Resources</dfn>, <dfn>Labor</dfn> and <dfn>Infrastructure</dfn>, followed by a decimal integer
-      representing <dfn>Efficiency</dfn> written with a leading sign (zero is written as <code>+0</code>).
+      The Economic Extension is abbreviated Ex and written in
+      parentheses (<code>()</code>). It describes the strength of a
+      world's economy. It is given as three <a href="#ehex">eHex</a>
+      digits representing <dfn>Resources</dfn>, <dfn>Labor</dfn>
+      and <dfn>Infrastructure</dfn>, followed by a decimal integer
+      representing <dfn>Efficiency</dfn> written with a leading sign
+      (zero is written as <code>+0</code>).
     </p>
   </section>
 
@@ -1150,9 +1255,11 @@ market for trade goods, or both.
     <h2>Cultural Extension</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) <span class="highlight">[9C6D]</span> BcCeF NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The Cultural Extension is abbreviated Cx and written in brackets (<code>[]</code>).
-      It gives insight into the social behavior of the world's population. It is given as
-      four <a href="#ehex">eHex</a> digits representing <dfn>Homogeneity</dfn>, <dfn>Acceptance</dfn>,
+      The Cultural Extension is abbreviated Cx and written in brackets
+      (<code>[]</code>). It gives insight into the social behavior of
+      the world's population. It is given as
+      four <a href="#ehex">eHex</a> digits
+      representing <dfn>Homogeneity</dfn>, <dfn>Acceptance</dfn>,
       <dfn>Strangeness</dfn>, and <dfn>Symbols</dfn>.
     </p>
   </section>
@@ -1162,7 +1269,8 @@ market for trade goods, or both.
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] <span class="highlight">BcCeF</span> NS - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>For Imperial worlds, the noble ranks assigned to the world by the Emperor based on importance.</p>
     <p>
-       If no noble ranks are assigned to the system, the field may be empty, a blank (space) or <code>-</code> (dash).
+       If no noble ranks are assigned to the system, the field may be
+       empty, a blank (space) or <code>-</code> (dash).
     </p>
     <table>
       <tr><th>Code<th>Ranking Noble
@@ -1183,17 +1291,20 @@ market for trade goods, or both.
     <h2>Bases</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF <span class="highlight">NS</span> - 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      Base codes show the presence of military bases in a system; special codes deal with the presence of more than one type of base within the
-same system in order to maintain a single base code letter per system.
+      Base codes show the presence of military bases in a system;
+      special codes deal with the presence of more than one type of
+      base within the same system in order to maintain a single base
+      code letter per system.
     </p>
     <p>
        If no bases are present in the system, the field may be empty, a blank (space) or <code>-</code> (dash).
     </p>
 
     <p class="aside">
-      Base codes have changed significantly between different editions of <cite>Traveller</cite>.
-      Sector data collections must indicate which set of codes are in use.
-      Sector data collections may also define custom meanings for base codes.
+      Base codes have changed significantly between different editions
+      of <cite>Traveller</cite>. Sector data collections must indicate
+      which set of codes are in use. Sector data collections may also
+      define custom meanings for base codes.
     </p>
 
     <h3><cite>Traveller<sup>5</sup></cite></h3>
@@ -1211,6 +1322,10 @@ same system in order to maintain a single base code letter per system.
         <td><code>D</code>
         <td>Naval Depot.
         <td>Any.
+      <tr>
+        <td><code>E</code>
+        <td>Embassy.
+        <td>Hiver.
       <tr>
         <td><code>K</code>
         <td>Naval Base.
@@ -1241,16 +1356,16 @@ same system in order to maintain a single base code letter per system.
         <td>Any.
       <tr>
         <td><code>W</code>
-        <td>Scout Way Station.
-        <td>Imperial.
-      <tr>
-        <td><code>X</code>
-        <td>Relay Station.
-        <td>Zhodani.
+        <td>Way Station.
+        <td>Any.
     </table>
 
-    <p>Multiple codes may be used if multiple bases are present. For example, <code>NS</code> indicates that the system
-      contains both an Imperial Naval Base and an Imperial Scout Base.
+    <p>
+      Multiple codes may be used if multiple bases are present. For
+      example, <code>NS</code> indicates that the system contains both
+      an Imperial Naval Base and an Imperial Scout Base. Base codes
+      should appear in alphabetical order, i.e. <code>MN</code> rather
+      than <code>NM</code>.
     </p>
 
     <h3>
@@ -1397,10 +1512,12 @@ same system in order to maintain a single base code letter per system.
     <h2>Travel Zone</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS <span class="highlight">-</span> 703 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      Codes assigned to the system by government or private institutions about the safety of travel within the system.
+      Codes assigned to the system by government or private
+      institutions about the safety of travel within the system.
     </p>
     <p class="aside">
-      Worlds given a Green Zone rating are usually indicated by leaving the data field blank or <code>-</code> (dash).
+      Worlds given a Green Zone rating are usually indicated by
+      leaving the data field blank or <code>-</code> (dash).
     </p>
     <table>
       <tr>
@@ -1440,8 +1557,10 @@ same system in order to maintain a single base code letter per system.
     </table>
     <p>
       <em>
-        Imperial travel codes are provided by the <cite>Journal of the Travellers’ Aid Society</cite>, and are used with permission of that publication.
-        Worlds outside the Imperium should be considered Amber Zones by travellers from the Imperium.
+        Imperial travel codes are provided by the <cite>Journal of the
+        Travellers’ Aid Society</cite>, and are used with permission
+        of that publication. Worlds outside the Imperium should be
+        considered Amber Zones by travellers from the Imperium.
       </em>
     </p>
   </section>
@@ -1453,7 +1572,8 @@ same system in order to maintain a single base code letter per system.
     <h3>Population Multiplier</h3>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - <span class="highlight">7</span>03 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The first <a href="#ehex">eHex</a> digit is the population multiplier. Together with the
+      The first <a href="#ehex">eHex</a> digit is the population
+      multiplier. Together with the
       <a href="#population_exponent">population exponent</a> in the <a href="#uwp">UWP</a>
       field, the world population can be computed as:
     </p>
@@ -1461,22 +1581,24 @@ same system in order to maintain a single base code letter per system.
       population = <i>multiplier</i> &times; 10<sup><i>exponent</i></sup>
     </p>
     <p class="aside">
-      Some legacy files may erroneously have <code>0</code> for the population multiplier but non-zero for the population exponent.
+      Some legacy files may erroneously have <code>0</code> for the
+      population multiplier but non-zero for the population exponent.
       Treat the multiplier as <code>1</code> in these cases.
     </p>
     <h3>Planetoid Belts</h3>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 7<span class="highlight">0</span>3 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The second <a href="#ehex">eHex</a> digit is the number of planetoid belts in the system.
-      A main world of size <code>0</code> is termed an asteriod belt, and is not
+      The second <a href="#ehex">eHex</a> digit is the number of
+      planetoid belts in the system. A main world of
+      size <code>0</code> is termed an asteriod belt, and is not
       counted here.
     </p>
 
     <h3>Gas Giants</h3>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 70<span class="highlight">3</span> 8 ImDd F7 V BD M3 V</code></div>
     <p>
-      The third <a href="#ehex">eHex</a> digit is the number of gas giants in the system, suitable
-      for fuel skimming.
+      The third <a href="#ehex">eHex</a> digit is the number of gas
+      giants in the system, suitable for fuel skimming.
     </p>
   </section>
 
@@ -1484,10 +1606,11 @@ same system in order to maintain a single base code letter per system.
     <h2>Worlds</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 <span class="highlight">8</span> ImDd F7 V BD M3 V</code></div>
     <p>
-      The number of "worlds" in the system. This is given as a decimal integer, and will always be at least
-      1 (the main world) plus the number of planetoid belts (see <a href="#pbg">PBG</a>) plus the
-      number of gas giants (see <a href="#pbg">PBG</a>) but will include other planets orbiting
-      the star(s) in the system.
+      The number of "worlds" in the system. This is given as a decimal
+      integer, and will always be at least 1 (the main world) plus the
+      number of planetoid belts (see <a href="#pbg">PBG</a>) plus the
+      number of gas giants (see <a href="#pbg">PBG</a>) but will
+      include other planets orbiting the star(s) in the system.
     </p>
   </section>
 
@@ -1495,118 +1618,170 @@ same system in order to maintain a single base code letter per system.
     <h2>Allegiance</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 <span class="highlight">ImDd</span> F7 V BD M3 V</code></div>
     <p>
-      Allegiances indicate the government which dominates a
-system. A short abbreviation is used.
+      Allegiances indicate the government which dominates a system. A
+      short abbreviation is used.
     </p>
 
     <h3><cite>Traveller<sup>5</sup></cite></h3>
 
     <p>
-      The allegiance code is a 4-character code which is selected to uniquely identify a polity in Charted Space.
+      The allegiance code is a 4-character code which is selected to
+      uniquely identify a polity in Charted Space.
     </p>
 
     <table>
-      <tr><th>Code<th>Description
-      <tr><td><code>AnTC</code><td>Anubian Trade Coalition
-      <tr><td><code>AsIf</code><td>Iyeaao'fte (Tlaukhu client state)
-      <tr><td><code>AsMw</code><td>Aslan Hierate, single multiple-world clan dominates
-      <tr><td><code>AsOf</code><td>Oleaiy'fte (Tlaukhu client state)
-      <tr><td><code>AsSc</code><td>Aslan Hierate, multiple clans split control
-      <tr><td><code>AsSF</code><td>Aslan Hierate, small facility (temporary)
-      <tr><td><code>AsT0</code><td>Aslan Hierate, Tlaukhu control, Yerlyaruiwo (1), Hrawoao (13), Eisohiyw (14), Ferekhearl (19)
-      <tr><td><code>AsT1</code><td>Aslan Hierate, Tlaukhu control, Khauleairl (2), Estoieie' (16), Toaseilwi (22)
-      <tr><td><code>AsT2</code><td>Aslan Hierate, Tlaukhu control, Syoisuis (3)
-      <tr><td><code>AsT3</code><td>Aslan Hierate, Tlaukhu control, Tralyeaeawi (4), Yulraleh (12), Aiheilar (25), Riyhalaei (28)
-      <tr><td><code>AsT4</code><td>Aslan Hierate, Tlaukhu control, Eakhtiyho (5), Eteawyolei' (11), Fteweyeakh (23)
-      <tr><td><code>AsT5</code><td>Aslan Hierate, Tlaukhu control, Hlyueawi (6), Isoitiyro (15)
-      <tr><td><code>AsT6</code><td>Aslan Hierate, Tlaukhu control, Uiktawa (7), Iykyasea (17), Faowaou (27)
-      <tr><td><code>AsT7</code><td>Aslan Hierate, Tlaukhu control, Ikhtealyo (8), Tlerfearlyo (20), Yehtahikh (24)
-      <tr><td><code>AsT8</code><td>Aslan Hierate, Tlaukhu control, Seieakh (9), Akatoiloh (18), We'okunir (29)
-      <tr><td><code>AsT9</code><td>Aslan Hierate, Tlaukhu control, Aokhalte (10), Sahao' (21), Ouokhoi (26)
-      <tr><td><code>AsTv</code><td>Aslan Hierate, Tlaukhu vassal clan dominates
-      <tr><td><code>AsTz</code><td>Aslan Hierate, Zodia clan (Tralyeaeawi vassal)
-      <tr><td><code>AsVc</code><td>Aslan Hierate, vassal clan dominates
-      <tr><td><code>AsWc</code><td>Aslan Hierate, single one-world clan dominates
-      <tr><td><code>AsXX</code><td>Aslan Hierate, unknown
-      <tr><td><code>BlSo</code><td>Belgardian Sojurnate
-      <tr><td><code>CaAs</code><td>Carrillian Assembly
-      <tr><td><code>CaPr</code><td>Principality of Caledon
-      <tr><td><code>CaTe</code><td>Carter Technocracy
-      <tr><td><code>CoLp</code><td>Council of Leh Perash
-      <tr><td><code>CsCa</code><td>Client State, Principality of Caledon
-      <tr><td><code>CsIm</code><td>Client State, Third Imperium
-      <tr><td><code>CsZh</code><td>Client State, Zhodani Consulate
-      <tr><td><code>CyUn</code><td>Cytralin Unity
-      <tr><td><code>DaCf</code><td>Darrian Confederation
-      <tr><td><code>DuCf</code><td>Confederation of Duncinae
-      <tr><td><code>FeHe</code><td>Federation of Heron
-      <tr><td><code>FlLe</code><td>Florian League
-      <tr><td><code>GaRp</code><td>Gamma Republic
-      <tr><td><code>GdMh</code><td>Grand Duchy of Marlheim
-      <tr><td><code>GdSt</code><td>Grand Duchy of Stoner
-      <tr><td><code>GeOr</code><td>Gerontocracy of Ormine
-      <tr><td><code>GlEm</code><td>Glorious Empire (Aslan independent clan, outcast)
-      <tr><td><code>GlFe</code><td>Glimmerdrift Federation
-      <tr><td><code>GnCl</code><td>Gniivi Collective
-      <tr><td><code>ImAp</code><td>Third Imperium, Amec Protectorate (Dagu)
-      <tr><td><code>ImDa</code><td>Third Imperium, Domain of Antares (Anta/Empt/Lish)
-      <tr><td><code>ImDc</code><td>Third Imperium, Domain of Sylea (Core/Delp/Forn/Mass)
-      <tr><td><code>ImDd</code><td>Third Imperium, Domain of Deneb (Dene/Reft/Spin/Troj)
-      <tr><td><code>ImDg</code><td>Third Imperium, Domain of Gateway (Glim/Hint/Ley)
-      <tr><td><code>ImDi</code><td>Third Imperium, Domain of Ilelish (Daib/Ilel/Reav/Verg/Zaru)
-      <tr><td><code>ImDs</code><td>Third Imperium, Domain of Sol (Alph/Dias/Magy/Olde/Solo)
-      <tr><td><code>ImDv</code><td>Third Imperium, Domain of Vland (Corr/Dagu/Gush/Reft/Vlan)
-      <tr><td><code>ImLa</code><td>Third Imperium, League of Antares (Anta)
-      <tr><td><code>ImLu</code><td>Third Imperium, Luriani Cultural Association (Ley/Forn)
-      <tr><td><code>ImSy</code><td>Third Imperium, Sylean Worlds (Core)
-      <tr><td><code>ImVd</code><td>Third Imperium, Vegan Autonomous District (Solo)
-      <tr><td><code>IsDo</code><td>Islaiat Dominate
-      <tr><td><code>JuHl</code><td>Julian Protectorate, Hegemony of Lorean
-      <tr><td><code>JuPr</code><td>Julian Protectorate, independent
-      <tr><td><code>JuRu</code><td>Julian Protectorate, Rukadukaz Republic
-      <tr><td><code>KhLe</code><td>Khuur League
-      <tr><td><code>LnRp</code><td>Loyal Nineworlds Republic
-      <tr><td><code>LyCo</code><td>Lanyard Colonies
-      <tr><td><code>MaEm</code><td>Maskai Empire
-      <tr><td><code>NaAs</code><td>Non-Aligned, Aslan-dominated (outside Hierate)
-      <tr><td><code>NaHu</code><td>Non-Aligned, Human-dominated
-      <tr><td><code>NaVa</code><td>Non-Aligned, Vargr-dominated
-      <tr><td><code>NaXX</code><td>Unclaimed
-      <tr><td><code>OcWs</code><td>Outcasts of the Whispering Sky
-      <tr><td><code>RaRa</code><td>Ral Ranta
-      <tr><td><code>SeFo</code><td>Senlis Foederate
-      <tr><td><code>SlLg</code><td>Shukikikar League
-      <tr><td><code>SoCf</code><td>Solomani Confederation
-      <tr><td><code>StCl</code><td>Strend Cluster
-      <tr><td><code>SwCf</code><td>Sword Worlds Confederation
-      <tr><td><code>TeAr</code><td>Tealou Arlaoh (Aslan independent clan, non-outcast)
-      <tr><td><code>UhHa</code><td>Union of Harmony
-      <tr><td><code>V40S</code><td>40th Squadron
-      <tr><td><code>VARC</code><td>Anti-Rukh Coalition
-      <tr><td><code>VAug</code><td>United Followers of Augurgh
-      <tr><td><code>VCKd</code><td>Commonality of Kedzudh
-      <tr><td><code>VDzF</code><td>Dzarrgh Federate
-      <tr><td><code>VPGa</code><td>Pact of Gaerr
-      <tr><td><code>VRuk</code><td>Worlds of Leader Rukh
-      <tr><td><code>VSDp</code><td>Seaknouth Dependency
-      <tr><td><code>VSEq</code><td>Society of Equals
-      <tr><td><code>VThE</code><td>Thoengling Empire
-      <tr><td><code>VTzE</code><td>Thirz Empire
-      <tr><td><code>VUru</code><td>Nation of Urukhu
-      <tr><td><code>XXXX</code><td>Unknown
-      <tr><td><code>ZhCo</code><td>Zhodani Consulate
-      </table>
+      <tr><th>Code<th>Description<th>Location
+        <!-- Allegiance Table Begin -->
+      <tr><td><code>AkUn</code><td>Akeena Union<td>Gate
+      <tr><td><code>AlCo</code><td>Altarean Confederation<td>Vang
+      <tr><td><code>AnTC</code><td>Anubian Trade Coalition<td>Hint
+      <tr><td><code>AsIf</code><td>Iyeaao'fte (Tlaukhu client state)<td>Ustr
+      <tr><td><code>AsMw</code><td>Aslan Hierate, single multiple-world clan dominates<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr/&#x200B;Verg
+      <tr><td><code>AsOf</code><td>Oleaiy'fte (Tlaukhu client state)<td>Ustr
+      <tr><td><code>AsSF</code><td>Aslan Hierate, small facility (temporary)<td>
+      <tr><td><code>AsSc</code><td>Aslan Hierate, multiple clans split control<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT0</code><td>Aslan Hierate, Tlaukhu control, Yerlyaruiwo (1), Hrawoao (13), Eisohiyw (14), Ferekhearl (19)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT1</code><td>Aslan Hierate, Tlaukhu control, Khauleairl (2), Estoieie' (16), Toaseilwi (22)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT2</code><td>Aslan Hierate, Tlaukhu control, Syoisuis (3)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT3</code><td>Aslan Hierate, Tlaukhu control, Tralyeaeawi (4), Yulraleh (12), Aiheilar (25), Riyhalaei (28)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT4</code><td>Aslan Hierate, Tlaukhu control, Eakhtiyho (5), Eteawyolei' (11), Fteweyeakh (23)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT5</code><td>Aslan Hierate, Tlaukhu control, Hlyueawi (6), Isoitiyro (15)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT6</code><td>Aslan Hierate, Tlaukhu control, Uiktawa (7), Iykyasea (17), Faowaou (27)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT7</code><td>Aslan Hierate, Tlaukhu control, Ikhtealyo (8), Tlerfearlyo (20), Yehtahikh (24)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT8</code><td>Aslan Hierate, Tlaukhu control, Seieakh (9), Akatoiloh (18), We'okunir (29)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsT9</code><td>Aslan Hierate, Tlaukhu control, Aokhalte (10), Sahao' (21), Ouokhoi (26)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsTA</code><td>Tealou Arlaoh (Aslan independent clan, non-outcast)<td>Uist/&#x200B;Ustr
+      <tr><td><code>AsTv</code><td>Aslan Hierate, Tlaukhu vassal clan dominates<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsTz</code><td>Aslan Hierate, Zodia clan (Tralyeaeawi vassal)<td>Iwah
+      <tr><td><code>AsVc</code><td>Aslan Hierate, vassal clan dominates<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsWc</code><td>Aslan Hierate, single one-world clan dominates<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>AsXX</code><td>Aslan Hierate, unknown<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Hlak/&#x200B;Iwah/&#x200B;Reav/&#x200B;Rift/&#x200B;Stai/&#x200B;Troj/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>BlSo</code><td>Belgardian Sojurnate<td>Troj
+      <tr><td><code>CAEM</code><td>Comsentient Alliance, Eslyat Magistracy<td>Beyo/&#x200B;Vang
+      <tr><td><code>CAKT</code><td>Comsentient Alliance, Kajaani Triumverate<td>Vang
+      <tr><td><code>CAin</code><td>Comsentient Alliance, independent<td>Vang
+      <tr><td><code>CaAs</code><td>Carrillian Assembly<td>Reav
+      <tr><td><code>CaPr</code><td>Principality of Caledon<td>Reav
+      <tr><td><code>CaTe</code><td>Carter Technocracy<td>Reav
+      <tr><td><code>CoLp</code><td>Council of Leh Perash<td>Hint
+      <tr><td><code>CsCa</code><td>Client state, Principality of Caledon<td>Reav
+      <tr><td><code>CsHv</code><td>Client state, Hiver Federation<td>Cruc/&#x200B;Spic
+      <tr><td><code>CsIm</code><td>Client state, Third Imperium<td>various
+      <tr><td><code>CsMP</code><td>Client state, Ma'Gnar Primarchic<td>Beyo
+      <tr><td><code>CsZh</code><td>Client state, Zhodani Consulate<td>Spin/&#x200B;Troj
+      <tr><td><code>CyUn</code><td>Cytralin Unity<td>Hint
+      <tr><td><code>DaCf</code><td>Darrian Confederation<td>Spin/&#x200B;Troj
+      <tr><td><code>DiWb</code><td>Die Weltbund<td>Beyo
+      <tr><td><code>DuCf</code><td>Confederation of Duncinae<td>Reav
+      <tr><td><code>FCSA</code><td>Four Corners Sovereign Array<td>Vang
+      <tr><td><code>FeAm</code><td>Federation of Amil<td>Cruc
+      <tr><td><code>FeHe</code><td>Federation of Heron<td>Glim
+      <tr><td><code>FlLe</code><td>Florian League<td>Troj
+      <tr><td><code>GaFd</code><td>Galian Federation<td>Gate
+      <tr><td><code>GaRp</code><td>Gamma Republic<td>Glim
+      <tr><td><code>GdKa</code><td>Grand Duchy of Kalradin<td>Cruc
+      <tr><td><code>GdMh</code><td>Grand Duchy of Marlheim<td>Reav
+      <tr><td><code>GdSt</code><td>Grand Duchy of Stoner<td>Glim
+      <tr><td><code>GeOr</code><td>Gerontocracy of Ormine<td>Dark
+      <tr><td><code>GlEm</code><td>Glorious Empire (Aslan independent clan, outcast)<td>Troj
+      <tr><td><code>GlFe</code><td>Glimmerdrift Federation<td>Cruc/&#x200B;Glim
+      <tr><td><code>GnCl</code><td>Gniivi Collective<td>Hint
+      <tr><td><code>GrCo</code><td>Grossdeutchland Confederation<td>Vang
+      <tr><td><code>HoPA</code><td>Hochiken People's Assembly<td>Gate
+      <tr><td><code>HvFd</code><td>Hiver Federation<td>Spic
+      <tr><td><code>HyLe</code><td>Hyperion League<td>Vang
+      <tr><td><code>IHPr</code><td>I'Sred*Ni Heptad Protectorate<td>Beyo
+      <tr><td><code>ImAp</code><td>Third Imperium, Amec Protectorate<td>Dagu
+      <tr><td><code>ImDa</code><td>Third Imperium, Domain of Antares<td>Anta/&#x200B;Empt/&#x200B;Lish
+      <tr><td><code>ImDc</code><td>Third Imperium, Domain of Sylea<td>Core/&#x200B;Delp/&#x200B;Forn/&#x200B;Mass
+      <tr><td><code>ImDd</code><td>Third Imperium, Domain of Deneb<td>Dene/&#x200B;Reft/&#x200B;Spin/&#x200B;Troj
+      <tr><td><code>ImDg</code><td>Third Imperium, Domain of Gateway<td>Glim/&#x200B;Hint/&#x200B;Ley
+      <tr><td><code>ImDi</code><td>Third Imperium, Domain of Ilelish<td>Daib/&#x200B;Ilel/&#x200B;Reav/&#x200B;Verg/&#x200B;Zaru
+      <tr><td><code>ImDs</code><td>Third Imperium, Domain of Sol<td>Alph/&#x200B;Dias/&#x200B;Magy/&#x200B;Olde/&#x200B;Solo
+      <tr><td><code>ImDv</code><td>Third Imperium, Domain of Vland<td>Corr/&#x200B;Dagu/&#x200B;Gush/&#x200B;Reft/&#x200B;Vlan
+      <tr><td><code>ImLa</code><td>Third Imperium, League of Antares<td>Anta
+      <tr><td><code>ImLu</code><td>Third Imperium, Luriani Cultural Association<td>Ley/&#x200B;Forn
+      <tr><td><code>ImSy</code><td>Third Imperium, Sylean Worlds<td>Core
+      <tr><td><code>ImVd</code><td>Third Imperium, Vegan Autonomous District<td>Solo
+      <tr><td><code>IsDo</code><td>Islaiat Dominate<td>Eali
+      <tr><td><code>JaPa</code><td>Jarnac Pashalic<td>Beyo/&#x200B;Vang
+      <tr><td><code>JuHl</code><td>Julian Protectorate, Hegemony of Lorean<td>Empt
+      <tr><td><code>JuPr</code><td>Julian Protectorate, independent<td>Empt
+      <tr><td><code>JuRu</code><td>Julian Protectorate, Rukadukaz Republic<td>Empt
+      <tr><td><code>KaCo</code><td>Katowice Conquest<td>Cruc
+      <tr><td><code>KaWo</code><td>Karhyri Worlds<td>Cruc
+      <tr><td><code>KhLe</code><td>Khuur League<td>Ley
+      <tr><td><code>KrBu</code><td>Kranzbund<td>Vang
+      <tr><td><code>LaCo</code><td>Langemarck Coalition<td>Vang
+      <tr><td><code>LnRp</code><td>Loyal Nineworlds Republic<td>Glim
+      <tr><td><code>LyCo</code><td>Lanyard Colonies<td>Reav
+      <tr><td><code>MaCl</code><td>Mapepire Cluster<td>Beyo
+      <tr><td><code>MaEm</code><td>Maskai Empire<td>Glim
+      <tr><td><code>MaPr</code><td>Ma'Gnar Primarchic<td>Beyo
+      <tr><td><code>MeCo</code><td>Megusard Corporate<td>Gate
+      <tr><td><code>MiCo</code><td>Mische Conglomerate<td>Cruc
+      <tr><td><code>MrCo</code><td>Mercantile Concord<td>Cruc
+      <tr><td><code>NaAs</code><td>Non-Aligned, Aslan-dominated (outside Hierate)<td>Akti/&#x200B;Dark/&#x200B;Eali/&#x200B;Rift/&#x200B;Uist/&#x200B;Ustr
+      <tr><td><code>NaHu</code><td>Non-Aligned, Human-dominated<td>various
+      <tr><td><code>NaVa</code><td>Non-Aligned, Vargr-dominated<td>Anta/&#x200B;Corr/&#x200B;Dene/&#x200B;Empt/&#x200B;Gvur/&#x200B;Lish/&#x200B;Vlan/&#x200B;Ziaf
+      <tr><td><code>NaXX</code><td>Non-Aligned, unclaimed<td>various
+      <tr><td><code>OcWs</code><td>Outcasts of the Whispering Sky<td>Hint
+      <tr><td><code>OlWo</code><td>Old Worlds<td>Cruc
+      <tr><td><code>PiFe</code><td>Pionier Fellowship<td>Vang
+      <tr><td><code>PlLe</code><td>Plavian League<td>Gate
+      <tr><td><code>RaRa</code><td>Ral Ranta<td>Hint
+      <tr><td><code>ReUn</code><td>Renkard Union<td>Gate
+      <tr><td><code>Reac</code><td>The Reach<td>Cruc
+      <tr><td><code>SeFo</code><td>Senlis Foederate<td>Troj
+      <tr><td><code>SlLg</code><td>Shukikikar League<td>Glim
+      <tr><td><code>SoCf</code><td>Solomani Confederation<td>Alph/&#x200B;Diab/&#x200B;Dark/&#x200B;Hint/&#x200B;Magy/&#x200B;Olde/&#x200B;Reav/&#x200B;Solo/&#x200B;Spic/&#x200B;Ustr
+      <tr><td><code>SoNS</code><td>Solomani Confederation, New Slavic Solidarity<td>Magy
+      <tr><td><code>SoRD</code><td>Solomani Confederation, Reformed Dootchen Estates<td>Magy
+      <tr><td><code>SoWu</code><td>Solomani Confederation, Wuan Technology Association<td>Diab/&#x200B;Magy
+      <tr><td><code>StCl</code><td>Strend Cluster<td>Troj
+      <tr><td><code>SwCf</code><td>Sword Worlds Confederation<td>Spin
+      <tr><td><code>SwFW</code><td>Swanfei Free Worlds<td>Gate
+      <tr><td><code>SyRe</code><td>Syzlin Republic<td>Cruc
+      <tr><td><code>TeCl</code><td>Tellerian Cluster<td>Vang
+      <tr><td><code>TrCo</code><td>Trindel Confederacy<td>Gate
+      <tr><td><code>TrDo</code><td>Trelyn Domain<td>Vang/&#x200B;Farf
+      <tr><td><code>UnHa</code><td>Union of Harmony<td>Dark/&#x200B;Reav
+      <tr><td><code>V40S</code><td>40th Squadron (Ekhelle Ksafi)<td>Gvur
+      <tr><td><code>VARC</code><td>Anti-Rukh Coalition (Gnoerrgh Rukh Lloell)<td>Gvur
+      <tr><td><code>VAug</code><td>United Followers of Augurgh<td>Dene
+      <tr><td><code>VBkA</code><td>Bakne Alliance<td>
+      <tr><td><code>VCKd</code><td>Commonality of Kedzudh (Kedzudh Aeng)<td>Gvur
+      <tr><td><code>VDzF</code><td>Dzarrgh Federate<td>Dene
+      <tr><td><code>VLIn</code><td>Llaeghskath Interacterate<td>
+      <tr><td><code>VPGa</code><td>Pact of Gaerr (Gaerr Thue)<td>Gvur
+      <tr><td><code>VRrS</code><td>Rranglloez Stronghold<td>
+      <tr><td><code>VRuk</code><td>Worlds of Leader Rukh (Rukh Aegz)<td>Gvur
+      <tr><td><code>VSDp</code><td>Saeknouth Dependency (Saeknouth Igz)<td>Gvur
+      <tr><td><code>VSEq</code><td>Society of Equals (Dzen Aeng Kho)<td>Gvur
+      <tr><td><code>VThE</code><td>Thoengling Empire (Thoengling Raghz)<td>Gvur
+      <tr><td><code>VTzE</code><td>Thirz Empire (Thirz Uerra)<td>Gvur/&#x200B;Ziaf
+      <tr><td><code>VUru</code><td>Urukhu<td>Gvur
+      <tr><td><code>VVar</code><td>Empire of Varroerth<td>
+      <tr><td><code>VWP2</code><td>Windhorn Pact of Two<td>
+      <tr><td><code>VWan</code><td>People of Wanz<td>
+      <tr><td><code>ViCo</code><td>Viyard Concourse<td>Gate
+      <tr><td><code>XXXX</code><td>Unknown<td>various
+      <tr><td><code>ZhCa</code><td>Zhodani Consulate, Colonnade province<td>Vang
+      <tr><td><code>ZhCo</code><td>Zhodani Consulate, undetermined<td>various
+      <tr><td><code>ZhIN</code><td>Zhodani Consulate, Iadr Nsobl province<td>
+      <tr><td><code>ZyCo</code><td>Zydarian Codominion<td>Beyo
+        <!-- Allegiance Table End -->
+    </table>
 
     <h3>
       <cite>Classic Traveller</cite>, <cite>MegaTraveller</cite>, <cite>Traveller: The New Era</cite>, <cite>Traveller: 4th Edition</cite>
     </h3>
 
     <p>
-      Older versions of Traveller use a 2-character code.
-      Due to the limited number of useful 2-character codes, these are
-      not unique across Charted Space.
+      Older versions of Traveller use a 2-character code. Due to the
+      limited number of useful 2-character codes, these are not unique
+      across Charted Space.
     </p>
-
 
     <table>
       <tr>
@@ -1653,37 +1828,19 @@ system. A short abbreviation is used.
         <td>Empty, unclaimed system.
     </table>
 
-
-
   </section>
 
   <section id="stellar">
     <h2>Stellar Data</h2>
     <div class="example"><code>1910 Regina A788899-C Ri Pa Ph An Cp (Amindii)2   { 4 }  (D7E+4) [9C6D] BcCeF NS - 703 8 ImDd <span class="highlight">F7 V BD M3 V</span></code></div>
     <p>
-      Stellar Data indicates the spectral and luminosity class of
-      each star in the system. This uses a subset of the
+      Stellar Data indicates the spectral and luminosity class of each
+      star in the system. This uses a subset of the
       <a target="_blank" href="http://en.wikipedia.org/wiki/Stellar_classification">Morgan–Keenan classification system</a>
       (also known as Yerkes or MKK), such as <code>G2 V</code> where <code>G2</code>
       is the color/temperature (<sup>2</sup>&frasl;<sub>10</sub><sup>th</sup> of the way
       from yellow <code>G</code> to orange <code>K</code> on the spectrum) and
       <code>V</code> is the luminosity/size (main sequence).
-    </p>
-
-    <p>
-      The size code <code>D</code> may be used for white dwarf stars, either
-      alone or followed by a spectral code, e.g.
-      <code>DB</code>,
-      <code>DA</code>,
-      <code>DF</code>,
-      <code>DG</code>,
-      <code>DK</code>,
-      <code>DM</code>.
-      <em>(Note: This differs significantly from real-world classification of white dwarf stars.)</em>
-    </p>
-
-    <p>
-      The special code <code>BD</code> may be used for brown dwarf, sub-stellar objects.
     </p>
 
     <h3>Stellar Spectral Class</h3>
@@ -1729,13 +1886,15 @@ system. A short abbreviation is used.
         <td>2,000-3,700
     </table>
     <p>
-      Stellar type indicates the spectral classification of a
-star; colors are the essential perceived colors of the star’s visible light.
+      Stellar type indicates the spectral classification of a star;
+      colors are the essential perceived colors of the star’s visible
+      light.
     </p>
     <h3>Stellar Luminosity</h3>
     <p>
-      The luminosity gives the magnitude, or brightness of the star. This correlates with the size of the
-      star, although it varies depending on spectral class.
+      The luminosity gives the magnitude, or brightness of the star.
+      This correlates with the size of the star, although it varies
+      depending on spectral class.
     </p>
     <table>
       <tr>
@@ -1784,23 +1943,70 @@ star; colors are the essential perceived colors of the star’s visible light.
         <td>0.006 - 0.018
 
     </table>
+
+    <h3>
+      <cite>Classic Traveller</cite>, <cite>MegaTraveller</cite>, <cite>Traveller: The New Era</cite>, <cite>Traveller: 4th Edition</cite>
+    </h3>
+
+    <p>
+      White dwarf stars are represented by the size
+      code <code>D</code>, optionally followed by a spectral code,
+      e.g.
+
+      <code>DB</code>,
+      <code>DA</code>,
+      <code>DF</code>,
+      <code>DG</code>,
+      <code>DK</code>,
+      <code>DM</code>.
+      <em>(Note: This differs significantly from real-world
+      classification of white dwarf stars.)</em>
+    </p>
+
+    <p>
+      Some files may use luminosity code <code>VII</code> for white
+      dwarf stars instead.
+    </p>
+
+    <p>
+      The special code <code>BH</code> may be used for black holes.
+    </p>
+
+    <h3><cite>Traveller<sup>5</sup></cite></h3>
+
+   <p>
+      White dwarf stars are represented by the size
+      code <code>D</code> with no spectral code.
+   </p>
+
+    <p>
+      The special code <code>BD</code> may be used for brown dwarf,
+      sub-stellar objects.
+    </p>
+
   </section>
 
   <section id="ehex">
     <h2>eHex - Extended Hexadecimal</h2>
     <p>
-      <cite>Traveller</cite> encodes numbers using "extended hexadecimal", which is really a way of encoding numbers
-      larger than 9 into a single printable character. Numbers in the range 0-9 are represented as <code>0</code>-<code>9</code> as normal.
-      Like hexadecimal, values in the range 10-15 are represented as <code>A</code>-<code>F</code> (always uppercase). But the
-      encoding continues for values in the range 16-17 as <code>G</code>-<code>H</code>, 18-22 as <code>J</code>-<code>N</code>,
-      and 23-30 as <code>P</code>-<code>W</code>.
+      <cite>Traveller</cite> encodes numbers using "extended
+      hexadecimal", which is really a way of encoding numbers larger
+      than 9 into a single printable character. Numbers in the range
+      0-9 are represented as <code>0</code>-<code>9</code> as normal.
+      Like hexadecimal, values in the range 10-15 are represented
+      as <code>A</code>-<code>F</code> (always uppercase). But the
+      encoding continues for values in the range 16-17
+      as <code>G</code>-<code>H</code>, 18-22
+      as <code>J</code>-<code>N</code>, and 23-30
+      as <code>P</code>-<code>W</code>.
     </p>
     <p>
-      Codes <code>X</code>, <code>Y</code> and <code>Z</code> may be used for
-      31-33 or may be reserved for exceptional values.
-      Code <code>X</code>, in particular, is reserved for <i>unknown</i> values, such as
-      the details of intentionally unexplored systems.
-      Codes <code>I</code> and <code>O</code> are unused to avoid confusion with
+      Codes <code>X</code>, <code>Y</code> and <code>Z</code> may be
+      used for 31-33 or may be reserved for exceptional values.
+      Code <code>X</code>, in particular, is reserved
+      for <i>unknown</i> values, such as the details of intentionally
+      unexplored systems. Codes <code>I</code> and <code>O</code> are
+      unused to avoid confusion with
       <code>1</code> and <code>0</code>.
     </p>
     <table>
@@ -1921,21 +2127,18 @@ star; colors are the essential perceived colors of the star’s visible light.
 
 <div class="editorial">
   <p>
-    The <em class="product">Traveller</em> game in all forms is owned by Far
-Future Enterprises. Copyright &copy; 1977 &ndash; 2014 Far Future
-Enterprises.
+    The <em class="product">Traveller</em> game in all forms is owned
+    by Far Future Enterprises. Copyright &copy; 1977 &ndash; 2015 Far
+    Future Enterprises.
     <a href="http://farfuture.net/FFEFairUsePolicy2008.pdf">Fair Use Policy</a>
 </div>
 
 <!-- Google Analytics -->
 <script>
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-18610679-2']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-18610679-2', 'auto');
+  ga('send', 'pageview');
 </script>

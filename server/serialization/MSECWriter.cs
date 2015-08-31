@@ -149,7 +149,7 @@ namespace Maps.Serialization
                     writer.Write(route.StartOffsetY.ToString(CultureInfo.InvariantCulture));
                     writer.Write(" ");
                 }
-                writer.Write(route.Start.ToString("0000", CultureInfo.InvariantCulture));
+                writer.Write(route.StartHex);
 
                 writer.Write(" ");
 
@@ -160,7 +160,7 @@ namespace Maps.Serialization
                     writer.Write(route.EndOffsetY.ToString(CultureInfo.InvariantCulture));
                     writer.Write(" ");
                 }
-                writer.Write(route.End.ToString("0000", CultureInfo.InvariantCulture));
+                writer.Write(route.EndHex);
 
                 SectorStylesheet.StyleResult ssr = sector.ApplyStylesheet("route", route.Allegiance);
                 Color? color = route.Color ?? ssr.GetColor("color");
@@ -207,7 +207,7 @@ namespace Maps.Serialization
                 if (border.ShowLabel && (border.Label != null || alleg != null))
                 {
                     writer.Write("label ");
-                    writer.Write(border.LabelPositionHex.ToString("0000", CultureInfo.InvariantCulture));
+                    writer.Write(border.LabelPositionHex);
                     writer.Write(" ");
                     writer.Write(border.Label ?? alleg.Name);
                     writer.WriteLine();

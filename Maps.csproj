@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -29,13 +29,14 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
@@ -60,6 +61,7 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
@@ -84,6 +86,7 @@
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PdfSharp, Version=1.32.2608.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
@@ -119,8 +122,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="booklet.html" />
-    <Content Include="booklet.js" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="server\WorldCollection.cs" />
+    <Content Include="404.html" />
     <Content Include="borders\bd_images\image001.gif" />
     <Content Include="borders\bd_images\image003.jpg" />
     <Content Include="borders\bd_images\image004.gif" />
@@ -157,12 +161,21 @@
     <Content Include="index.css" />
     <Content Include="lib\lightbox\lightbox.css" />
     <Content Include="lib\lightbox\lightbox.js" />
-    <Content Include="lib\polyfill\es6.js" />
+    <Content Include="lib\polyfill\experimental\fetch.js" />
     <Content Include="lib\polyfill\polyfill.js" />
-    <Content Include="post.js" />
-    <Content Include="poster.html" />
+    <Content Include="lib\polyfill\polyfill.min.js" />
+    <Content Include="make\booklet.html" />
+    <Content Include="make\booklet.js" />
+    <Content Include="make\borders.html" />
+    <Content Include="make\borders.js" />
+    <Content Include="make\path.html" />
+    <Content Include="make\path.js" />
+    <Content Include="make\post.js" />
+    <Content Include="make\poster.html" />
+    <Content Include="make\routes.html" />
     <Content Include="res\Candy\Galaxy.jpg" />
     <Content Include="res\Candy\Galaxy.png" />
+    <Content Include="res\Candy\Galaxy_Gray.png" />
     <Content Include="res\Candy\Nebula.png" />
     <Content Include="res\Candy\README.txt" />
     <Content Include="res\Candy\Rifts.png" />
@@ -192,6 +205,7 @@
     <Content Include="res\Sectors\Chtierabl.xml" />
     <Content Include="res\Sectors\Core.xml" />
     <Content Include="res\Sectors\Corridor.xml" />
+    <Content Include="res\Sectors\Crucis Margin.xml" />
     <Content Include="res\Sectors\Dagudashaag.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -203,12 +217,16 @@
     <Content Include="res\Sectors\Ealiyasiyw.xml" />
     <Content Include="res\Sectors\Empty Quarter.xml" />
     <Content Include="res\Sectors\extolian.xml" />
-    <Content Include="res\Sectors\Faraway\Varan.xml" />
+    <Content Include="res\Sectors\Far Frontiers.xml" />
+    <Content Include="res\Sectors\Faraway\Varan.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="res\Sectors\Folgore.xml" />
     <Content Include="res\Sectors\Foreven.xml" />
     <Content Include="res\Sectors\Fornast.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="res\Sectors\Gateway.xml" />
     <Content Include="res\Sectors\Glimmerdrift.xml" />
     <Content Include="res\Sectors\Gushemege.xml" />
     <Content Include="res\Sectors\Gvurrdon.xml" />
@@ -245,6 +263,7 @@
     <Content Include="res\Sectors\Solomani Rim.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="res\Sectors\Spica.xml" />
     <Content Include="res\Sectors\Spinward Marches.xml" />
     <Content Include="res\Sectors\Star%27s End.xml" />
     <Content Include="res\Sectors\Stiatlchepr.xml" />
@@ -314,13 +333,15 @@
     <Content Include="res\ui\youarehere_gray.png" />
     <Content Include="index.html" />
     <Content Include="index.js" />
-    <Content Include="polyfill\polyfill.js" />
     <Content Include="res\credits.js" />
     <Content Include="res\Vectors\CoreRoute.xml" />
     <Content Include="res\Vectors\J4Route.xml" />
     <Content Include="res\Vectors\J5Route.xml" />
     <Content Include="res\AprilFools\Starburst.png" />
     <Content Include="res\AprilFools\Starburst_Gray.png" />
+    <Content Include="res\world\cx.png" />
+    <Content Include="res\world\ex.png" />
+    <Content Include="res\world\uwp.png" />
     <Content Include="test\APITest.html" />
     <Content Include="test\APITest.js" />
     <Content Include="test\ImageTest.html" />
@@ -380,7 +401,6 @@
     <Content Include="res\sectors.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="res\Sectors\FarFrontiers.xml" />
     <Content Include="res\Vectors\Aslan.xml" />
     <Content Include="res\Vectors\DelphiRift.xml" />
     <Content Include="res\Vectors\GreatRift.xml" />
@@ -400,6 +420,7 @@
     <Content Include="res\Vectors\Zhodani.xml" />
     <Content Include="res\ZhodaniCoreRoute.xml" />
     <Content Include="site.css" />
+    <Content Include="tools\lintsec.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -439,7 +460,6 @@
     <Compile Include="server\SearchEngine.cs" />
     <Compile Include="server\SecondSurvey.cs" />
     <Compile Include="server\Sector.cs" />
-    <Compile Include="server\SectorDataCollection.cs" />
     <Compile Include="server\SectorStylesheet.cs" />
     <Compile Include="server\Selector.cs" />
     <Compile Include="server\serialization\ColumnUtils.cs" />
@@ -474,10 +494,11 @@
     <Content Include="res\Sectors\centrax.sec" />
     <Content Include="res\Sectors\blaskon.sec" />
     <Content Include="res\Sectors\Avereguar.sec" />
-    <Content Include="res\Sectors\Beyond.sec" />
+    <Content Include="res\Sectors\Beyond.tab" />
     <None Include="res\Sectors\Core.tab" />
     <None Include="res\Sectors\Corridor.tab" />
     <Content Include="res\Sectors\Dagudashaag.tab" />
+    <Content Include="res\Sectors\Crucis Margin.tab" />
     <None Include="res\Sectors\Daibei.tab" />
     <Content Include="res\Sectors\Dark Nebula.tab" />
     <None Include="res\Sectors\Delphi.tab" />
@@ -491,8 +512,10 @@
     <Content Include="res\Sectors\Faraway\JG-Glimmerdrift.sec" />
     <Content Include="res\Sectors\Faraway\JG-Ley.sec" />
     <Content Include="res\Sectors\Faraway\Maranatha-Alkahest.sec" />
-    <Content Include="res\Sectors\Faraway\Varan.tab" />
+    <Content Include="res\Sectors\Far Frontiers.sec" />
+    <Content Include="res\Sectors\Faraway\Varan.t5" />
     <None Include="res\Sectors\Fornast.tab" />
+    <Content Include="res\Sectors\Gateway.tab" />
     <None Include="res\Sectors\Glimmerdrift.tab" />
     <None Include="res\Sectors\Grikrng.sec" />
     <None Include="res\Sectors\Gushemege.tab" />
@@ -524,6 +547,7 @@
     <Content Include="res\Sectors\Riftspan Reaches.tab" />
     <None Include="res\Sectors\Solomani Rim.tab" />
     <Content Include="res\Sectors\Spangele.sec" />
+    <Content Include="res\Sectors\Spica.tab" />
     <None Include="res\Sectors\Spinward Marches.tab" />
     <Content Include="res\Sectors\Stiatlchepr.sec" />
     <Content Include="res\Sectors\Staihaia%27yo.tab" />
@@ -543,6 +567,14 @@
     <Content Include="res\Sectors\Ziafrplians.tab" />
     <Content Include="res\ui\youarehere.pdn" />
     <Content Include="res\ui\regina.pdf" />
+    <Content Include="res\t5ss\allegiance_codes.tsv" />
+    <Content Include="res\t5ss\base_codes.tsv" />
+    <Content Include="res\t5ss\sophont_codes.tsv" />
+    <Content Include="res\t5ss\update_allegiance_code.pl" />
+    <Content Include="res\t5ss\update_allegiance_docs.pl" />
+    <Content Include="res\t5ss\update_sophont_docs.pl" />
+    <Content Include="res\t5ss\update_world_data.pl" />
+    <Content Include="res\t5ss\world_data.tsv" />
     <None Include="res\Vectors\Galaxy_Positive.xvf" />
     <None Include="res\Sectors\Aerenfors.sec" />
     <None Include="res\Sectors\afawahisa.sec" />
@@ -556,7 +588,6 @@
     <None Include="res\Sectors\banners.sec" />
     <None Include="res\Sectors\canopus.sec" />
     <None Include="res\Sectors\chtierab.sec" />
-    <None Include="res\Sectors\CrucisMargin.sec" />
     <None Include="res\Sectors\Darret.sec" />
     <None Include="res\Sectors\Datsatl.sec" />
     <None Include="res\Sectors\Dfotseth.sec" />
@@ -568,13 +599,11 @@
     <None Include="res\Sectors\Fa Dzaets.sec" />
     <None Include="res\Sectors\Fahreahluis.sec" />
     <None Include="res\Sectors\faoheiroi-iyhao.sec" />
-    <None Include="res\Sectors\farfrontiers.sec" />
     <None Include="res\Sectors\Finggvakhou.sec" />
     <None Include="res\Sectors\ftaoiyekyu.sec" />
     <None Include="res\Sectors\fulani.sec" />
     <None Include="res\Sectors\Gakghang.sec" />
     <None Include="res\Sectors\gashikan.sec" />
-    <None Include="res\Sectors\Gateway.sec" />
     <None Include="res\Sectors\Gelath.sec" />
     <None Include="res\Sectors\Gh1hken.sec" />
     <None Include="res\Sectors\Ghoekhnael.sec" />
@@ -614,7 +643,6 @@
     <None Include="res\Sectors\provence.sec" />
     <None Include="res\Sectors\Rfigh.sec" />
     <None Include="res\Sectors\Rzakki.sec" />
-    <None Include="res\Sectors\spica.sec" />
     <None Include="res\Sectors\star-s_end.sec" />
     <None Include="res\Sectors\storr.sec" />
     <None Include="res\Sectors\Teahloarifu.sec" />

@@ -67,7 +67,7 @@ namespace Maps.API
                     Sector sector = map.FromName(sectorName);
                     if (sector == null)
                     {
-                        SendError(context.Response, 404, "Not Found", String.Format("The specified sector '{0'} was not found.", sectorName));
+                        SendError(context.Response, 404, "Not Found", String.Format("The specified sector '{0}' was not found.", sectorName));
                         return;
                     }
 
@@ -160,7 +160,7 @@ namespace Maps.API
             
             // Compute path
             float[] edgeX, edgeY;
-            RenderUtil.HexEdges(styles.microBorderStyle == MicroBorderStyle.Square ? PathUtil.PathType.Square : PathUtil.PathType.Hex,
+            RenderUtil.HexEdges(styles.hexStyle == HexStyle.Square ? PathUtil.PathType.Square : PathUtil.PathType.Hex,
                 out edgeX, out edgeY);
             PointF[] boundingPathCoords;
             byte[] boundingPathTypes;

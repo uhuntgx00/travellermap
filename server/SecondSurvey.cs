@@ -14,7 +14,7 @@ namespace Maps
         // Decimal hi:              0000000000111111111122222222223333
         // Decimal lo:              0123456789012345678901234567890123
 
-        public static char ToHex(int c) 
+        public static char ToHex(int c)
         {
             if (c == -1)
                 return 'S'; // Hack for "small" worlds
@@ -53,7 +53,7 @@ namespace Maps
         // ----  ---------  ------------------------
         // C     Vargr      Corsair base
         // D     Any        Depot
-        // E     Hiver      Embassy -------------- NONSTANDARD
+        // E     Hiver      Embassy
         // K     Any        Naval base
         // M     Any        Military base
         // N     Imperial   Naval base
@@ -62,8 +62,7 @@ namespace Maps
         // S     Imperial   Scout base
         // T     Aslan      Tlaukhu base
         // V     Any        Exploration base
-        // W     Imperial   Way station
-        // X     Zhodani    Relay station
+        // W     Any        Way station
 
         private static RegexDictionary<string> s_legacyBaseDecodeTable = new GlobDictionary<string> {
             { "*.2", "NS" },  // Imperial Naval base + Scout base
@@ -71,7 +70,7 @@ namespace Maps
             { "*.B", "NW" },  // Imperial Naval base + Scout Way station
             { "*.C", "C" },   // Vargr Corsair base
             { "*.D", "D" },   // Depot
-            { "*.E", "E"},    // Hiver Embassy            - TODO: Approved T5SS code for Embassy
+            { "*.E", "E"},    // Hiver Embassy
             { "So.F", "K" },  // Solomani Naval Base
             { "*.F", "KM" },  // Military & Naval Base
             { "*.G", "K" },   // Vargr Naval Base
@@ -90,10 +89,10 @@ namespace Maps
             { "*.T", "T" },   // Aslan Tlaukhu Base
             { "*.U", "RT" },  // Aslan Tlaukhu and Clan Base
             { "*.V", "V" },   // Scout/Exploration
-            { "*.W", "W" },   // Imperial Scout Way Station
-            { "*.X", "X" },   // Zhodani Relay Station
+            { "*.W", "W" },   // Way Station
+            { "*.X", "W" },   // Zhodani Relay Station
             { "*.Y", "D" },   // Zhodani Depot
-            { "*.Z", "KM" },   // Zhodani Naval/Military Base
+            { "*.Z", "KM" },  // Zhodani Naval/Military Base
         };
 
         public static string DecodeLegacyBases(string allegiance, string code)
@@ -109,7 +108,7 @@ namespace Maps
             { "*.C", "C" },   // Vargr Corsair base
             { "Zh.D", "Y" }, // Zhodani Depot
             { "*.D", "D" },   // Depot
-            { "*.E", "E"},   // Hiver Embassy             - TODO: Approved T5SS code for Embassy
+            { "*.E", "E"},   // Hiver Embassy
             { "*.KM", "F" },  // Military & Naval Base
             { "So.K", "F" },  // Solomani Naval Base
             { "V*.K", "G" },   // Vargr Naval Base
@@ -128,8 +127,8 @@ namespace Maps
             { "*.T", "T" },   // Aslan Tlaukhu Base
             { "*.RT", "U" },  // Aslan Tlaukhu and Clan Base
             { "*.V", "V" },   // Exploration
+            { "Zh.W", "X" },  // Zhodani Relay Station
             { "*.W", "W" },   // Imperial Scout Way Station
-            { "*.X", "X" }, // Zhodani Relay Station
             { "Zh.KM", "Z" }, // Zhodani Naval/Military Base
         };
 
@@ -154,7 +153,7 @@ namespace Maps
             { "As", "Aslan Hierate" },
             { "Cs", "Imperial Client State" },
             { "Dr", "Droyne" },
-            { "Hv", "Hive Federation" },
+            { "Hv", "Hiver Federation" },
             { "Im", "Third Imperium" },
             { "J-", "Julian Protectorate" },
             { "Jp", "Julian Protectorate" },
@@ -221,6 +220,7 @@ namespace Maps
             { "A9", "AsT9" },
             { "Cs", "CsIm" },
             { "Cz", "CsZh" },
+            { "Hv", "HvFd" },
             { "J-", "JuPr" },
             { "Jp", "JuPr" },
             { "Ju", "JuPr" },
@@ -249,12 +249,15 @@ namespace Maps
         }
         private static T5Allegiances s_t5Allegiances = new T5Allegiances {
             // T5Code, LegacyCode, BaseCode, Name
+            // Allegiance Table Begin
+            { "AkUn", "Ak", null, "Akeena Union" },
+            { "AlCo", "Al", null, "Altarean Confederation" },
             { "AnTC", "Ac", null, "Anubian Trade Coalition" },
-            { "AsIf", "As", "As", "Iyeaao'fte" },
+            { "AsIf", "As", "As", "Iyeaao'fte" }, // (Tlaukhu client state)
             { "AsMw", "As", "As", "Aslan Hierate, single multiple-world clan dominates" },
             { "AsOf", "As", "As", "Oleaiy'fte" }, // (Tlaukhu client state)
+            { "AsSF", "As", "As", "Aslan Hierate, small facility" }, // (temporary)
             { "AsSc", "As", "As", "Aslan Hierate, multiple clans split control" },
-            { "AsSF", "As", "As", "Aslan Hierate, small station" }, // (temporary)
             { "AsT0", "A0", "As", "Aslan Hierate, Tlaukhu control, Yerlyaruiwo (1), Hrawoao (13), Eisohiyw (14), Ferekhearl (19)" },
             { "AsT1", "A1", "As", "Aslan Hierate, Tlaukhu control, Khauleairl (2), Estoieie' (16), Toaseilwi (22)" },
             { "AsT2", "A2", "As", "Aslan Hierate, Tlaukhu control, Syoisuis (3)" },
@@ -265,31 +268,47 @@ namespace Maps
             { "AsT7", "A7", "As", "Aslan Hierate, Tlaukhu control, Ikhtealyo (8), Tlerfearlyo (20), Yehtahikh (24)" },
             { "AsT8", "A8", "As", "Aslan Hierate, Tlaukhu control, Seieakh (9), Akatoiloh (18), We'okunir (29)" },
             { "AsT9", "A9", "As", "Aslan Hierate, Tlaukhu control, Aokhalte (10), Sahao' (21), Ouokhoi (26)" },
+            { "AsTA", "Ta", "As", "Tealou Arlaoh" }, // (Aslan independent clan, non-outcast)
             { "AsTv", "As", "As", "Aslan Hierate, Tlaukhu vassal clan dominates" },
             { "AsTz", "As", "As", "Aslan Hierate, Zodia clan" }, // (Tralyeaeawi vassal)
             { "AsVc", "As", "As", "Aslan Hierate, vassal clan dominates" },
             { "AsWc", "As", "As", "Aslan Hierate, single one-world clan dominates" },
             { "AsXX", "As", "As", "Aslan Hierate, unknown" },
             { "BlSo", "Bs", null, "Belgardian Sojurnate" },
+            { "CAEM", "Es", null, "Comsentient Alliance, Eslyat Magistracy" },
+            { "CAKT", "Kt", null, "Comsentient Alliance, Kajaani Triumverate" },
+            { "CAin", "Co", null, "Comsentient Alliance" }, // independent
             { "CaAs", "Cb", null, "Carrillian Assembly" },
             { "CaPr", "Ca", null, "Principality of Caledon" },
             { "CaTe", "Ct", null, "Carter Technocracy" },
             { "CoLp", "Lp", null, "Council of Leh Perash" },
-            { "CsCa", "Ca", null, "Client State, Principality of Caledon" },
-            { "CsIm", "Cs", null, "Client State, Third Imperium" },
-            { "CsZh", "Cz", null, "Client State, Zhodani Consulate" },
+            { "CsCa", "Ca", null, "Client state, Principality of Caledon" },
+            { "CsHv", "Hc", null, "Client state, Hiver Federation" },
+            { "CsIm", "Cs", null, "Client state, Third Imperium" },
+            { "CsMP", "Ms", null, "Client state, Ma'Gnar Primarchic" },
+            { "CsZh", "Cz", null, "Client state, Zhodani Consulate" },
             { "CyUn", "Cu", null, "Cytralin Unity" },
             { "DaCf", "Da", null, "Darrian Confederation" },
+            { "DiWb", "Dw", null, "Die Weltbund" },
             { "DuCf", "Cd", null, "Confederation of Duncinae" },
+            { "FCSA", "Fc", null, "Four Corners Sovereign Array" },
+            { "FeAm", "FA", null, "Federation of Amil" },
             { "FeHe", "Fh", null, "Federation of Heron" },
             { "FlLe", "Fl", null, "Florian League" },
+            { "GaFd", "Ga", null, "Galian Federation" },
             { "GaRp", "Gr", null, "Gamma Republic" },
+            { "GdKa", "Rm", null, "Grand Duchy of Kalradin" },
             { "GdMh", "Ma", null, "Grand Duchy of Marlheim" },
             { "GdSt", "Gs", null, "Grand Duchy of Stoner" },
             { "GeOr", "Go", null, "Gerontocracy of Ormine" },
             { "GlEm", "Gl", "As", "Glorious Empire" }, // (Aslan independent clan, outcast)
             { "GlFe", "Gf", null, "Glimmerdrift Federation" },
             { "GnCl", "Gi", null, "Gniivi Collective" },
+            { "GrCo", "Gr", null, "Grossdeutchland Confederation" },
+            { "HoPA", "Ho", null, "Hochiken People's Assembly" },
+            { "HvFd", "Hv", "Hv", "Hiver Federation" },
+            { "HyLe", "Hy", null, "Hyperion League" },
+            { "IHPr", "IS", null, "I'Sred*Ni Heptad Protectorate" },
             { "ImAp", "Im", "Im", "Third Imperium, Amec Protectorate" },
             { "ImDa", "Im", "Im", "Third Imperium, Domain of Antares" },
             { "ImDc", "Im", "Im", "Third Imperium, Domain of Sylea" },
@@ -303,40 +322,73 @@ namespace Maps
             { "ImSy", "Im", "Im", "Third Imperium, Sylean Worlds" },
             { "ImVd", "Ve", "Im", "Third Imperium, Vegan Autonomous District" },
             { "IsDo", "Id", null, "Islaiat Dominate" },
+            { "JaPa", "Ja", null, "Jarnac Pashalic" },
             { "JuHl", "Hl", "Jp", "Julian Protectorate, Hegemony of Lorean" },
-            { "JuPr", "Jp", "Jp", "Julian Protectorate, independent" },
+            { "JuPr", "Jp", "Jp", "Julian Protectorate" }, // independent
             { "JuRu", "Jr", "Jp", "Julian Protectorate, Rukadukaz Republic" },
+            { "KaCo", "KC", null, "Katowice Conquest" },
+            { "KaWo", "KW", null, "Karhyri Worlds" },
             { "KhLe", "Kl", null, "Khuur League" },
+            { "KrBu", "Kr", null, "Kranzbund" },
+            { "LaCo", "Lc", null, "Langemarck Coalition" },
             { "LnRp", "Ln", null, "Loyal Nineworlds Republic" },
             { "LyCo", "Ly", null, "Lanyard Colonies" },
+            { "MaCl", "Ma", null, "Mapepire Cluster" },
             { "MaEm", "Mk", null, "Maskai Empire" },
+            { "MaPr", "MF", null, "Ma'Gnar Primarchic" },
+            { "MeCo", "Me", null, "Megusard Corporate" },
+            { "MiCo", "Mi", null, "Mische Conglomerate" },
+            { "MrCo", "MC", null, "Mercantile Concord" },
             { "NaAs", "As", "As", "Non-Aligned, Aslan-dominated" }, // (outside Hierate)
-            { "NaHu", "Na", null, "Non-Aligned, Human-dominated" },
+            { "NaHu", "Na", "Na", "Non-Aligned, Human-dominated" },
             { "NaVa", "Va", null, "Non-Aligned, Vargr-dominated" },
-            { "NaXX", "Na", null, "Unclaimed" },
+            { "NaXX", "Na", "Na", "Non-Aligned, unclaimed" },
             { "OcWs", "Ow", null, "Outcasts of the Whispering Sky" },
+            { "OlWo", "Ow", null, "Old Worlds" },
+            { "PiFe", "Pi", null, "Pionier Fellowship" },
+            { "PlLe", "Pl", null, "Plavian League" },
             { "RaRa", "Ra", null, "Ral Ranta" },
+            { "ReUn", "Re", null, "Renkard Union" },
+            { "Reac", "Rh", null, "The Reach" },
             { "SeFo", "Sf", null, "Senlis Foederate" },
             { "SlLg", "Sl", null, "Shukikikar League" },
             { "SoCf", "So", "So", "Solomani Confederation" },
+            { "SoNS", "So", "So", "Solomani Confederation, New Slavic Solidarity" },
+            { "SoRD", "So", "So", "Solomani Confederation, Reformed Dootchen Estates" },
+            { "SoWu", "So", "So", "Solomani Confederation, Wuan Technology Association" },
             { "StCl", "Sc", null, "Strend Cluster" },
             { "SwCf", "Sw", null, "Sword Worlds Confederation" },
-            { "TeAr", "Ta", "As", "Tealou Arlaoh" }, // (Aslan independent clan, non-outcast)
+            { "SwFW", "Sw", null, "Swanfei Free Worlds" },
+            { "SyRe", "Sy", null, "Syzlin Republic" },
+            { "TeCl", "Tc", null, "Tellerian Cluster" },
+            { "TrCo", "Tr", null, "Trindel Confederacy" },
+            { "TrDo", "Td", null, "Trelyn Domain" },
             { "UnHa", "Uh", null, "Union of Harmony" },
-            { "V40S", "Ve", "Va", "40th Squadron" },
-            { "VARC", "Vr", "Va", "Anti-Rukh Coalition" },
+            { "V40S", "Ve", "Va", "40th Squadron" }, // (Ekhelle Ksafi)
+            { "VARC", "Vr", "Va", "Anti-Rukh Coalition" }, // (Gnoerrgh Rukh Lloell)
             { "VAug", "Vu", "Va", "United Followers of Augurgh" },
-            { "VCKd", "Vk", "Va", "Commonality of Kedzudh" },
+            { "VBkA", "Vb", "Va", "Bakne Alliance" },
+            { "VCKd", "Vk", "Va", "Commonality of Kedzudh" }, // (Kedzudh Aeng)
             { "VDzF", "Vf", "Va", "Dzarrgh Federate" },
-            { "VPGa", "Vg", "Va", "Pact of Gaerr" },
-            { "VRuk", "Vn", "Va", "Worlds of Leader Rukh" },
-            { "VSDp", "Vs", "Va", "Seaknouth Dependency" },
-            { "VSEq", "Vd", "Va", "Society of Equals" },
-            { "VThE", "Vt", "Va", "Thoengling Empire" },
-            { "VTzE", "Vp", "Va", "Thirz Empire" },
-            { "VUru", "Vu", "Va", "Nation of Urukhu" },
+            { "VLIn", "Vi", "Va", "Llaeghskath Interacterate" },
+            { "VPGa", "Vg", "Va", "Pact of Gaerr" }, // (Gaerr Thue)
+            { "VRrS", "VW", "Va", "Rranglloez Stronghold" },
+            { "VRuk", "Vn", "Va", "Worlds of Leader Rukh" }, // (Rukh Aegz)
+            { "VSDp", "Vs", "Va", "Saeknouth Dependency" }, // (Saeknouth Igz)
+            { "VSEq", "Vd", "Va", "Society of Equals" }, // (Dzen Aeng Kho)
+            { "VThE", "Vt", "Va", "Thoengling Empire" }, // (Thoengling Raghz)
+            { "VTzE", "Vp", "Va", "Thirz Empire" }, // (Thirz Uerra)
+            { "VUru", "Vu", "Va", "Urukhu" },
+            { "VVar", "Ve", "Va", "Empire of Varroerth" },
+            { "VWP2", "V2", "Va", "Windhorn Pact of Two" },
+            { "VWan", "Vw", "Va", "People of Wanz" },
+            { "ViCo", "Vi", null, "Viyard Concourse" },
             { "XXXX", "Xx", null, "Unknown" },
-            { "ZhCo", "Zh", "Zh", "Zhodani Consulate" }
+            { "ZhCa", "Ca", "Zh", "Zhodani Consulate, Colonnade province" },
+            { "ZhCo", "Zh", "Zh", "Zhodani Consulate" }, // undetermined
+            { "ZhIN", "Zh", "Zh", "Zhodani Consulate, Iadr Nsobl province" },
+            { "ZyCo", "Zc", null, "Zydarian Codominion" },
+            // Allegiance Table End
         };
 
         private static readonly HashSet<string> s_defaultAllegiances = new HashSet<string> {

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<title>Sector Data File Formats</title>
+<title>Sector Data File Formats - Traveller Map</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="../favicon.ico">
 <link rel="stylesheet" href="../site.css">
 <meta name="viewport" content="initial-scale=1, width=device-width">
+<script src="../lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
 
 <style>
 table.format { margin-left: -0.75in; }
@@ -57,6 +58,15 @@ each data format. The companion document
 <a href="secondsurvey">Second Survey Data Definitions</a>
 may be used for reference.
 </p>
+
+<p class="aside">
+<cite>Traveller</cite> sector data typically only includes the
+UWP listings for worlds. Additional data that may be presented
+in maps, such as subsector names, borders, routes and so
+forth is not covered. See <a href="metadata">Sector Metadata
+File Format</a> for more details.
+</p>
+
 </div>
 
 <section id="toc">
@@ -243,7 +253,8 @@ data published in GDW's <cite>The Spinward Marches Campaign</cite>.
 <p>
 Joe Fugate of Digest Group Publications generated data for the
 Imperium and several surrounding sectors, 35 in total. This data was
-made available to the public by uploading to the GEnie information
+made available to the public by uploading to the
+<a target="_blank" href="https://en.wikipedia.org/wiki/GEnie">GEnie</a> information
 service. It was later hosted on an FTP file server named "Sunbane".
 This dataset is often referred to as "GENII" <i>(sic)</i> or most commonly
 "the Sunbane data".
@@ -581,10 +592,6 @@ data as extensions. Additional parsing may be applied to distinguish these from
 stellar data, using the following regular expression:
 </ul>
 
-<p>
-This approach is not perfect. Many fields end up with the codes and
-zone fields running together.
-
 <pre class="code">
 ^
 (?&lt;primary&gt;
@@ -695,7 +702,7 @@ and players. This allows us to establish a canonical data format.
 
 <p>
 The format utilizes the UTF-8 encoding. Therefore, each character may
-take more than one byte, but all of Earth's writing systems can be
+take more than one byte, but most of Earth's writing systems can be
 represented using <a href="http://unicode.org">Unicode</a>.
 
 This is a line-oriented, plain text,
@@ -763,13 +770,14 @@ human-readable plain text format for the
 
 <p>
 The format utilizes the UTF-8 encoding. Therefore, each character may
-take more than one byte, but all of Earth's writing systems can be
+take more than one byte, but most of Earth's writing systems can be
 represented using <a href="http://unicode.org">Unicode</a>.
 This is a variable-width, line-oriented format. Fields are fixed
 width, separated by one space, left aligned and padded by spaces.
 Lines in the file are terminated with either LF
 (U+000A) or CR+LF (U+000D, U+000A).
-There is no escaping mechanism line breaking characters may occur within fields.
+There is no escaping mechanism  &ndash; neither tabs nor
+line breaking characters may occur within fields.
 </p>
 
 <p>
@@ -1137,20 +1145,17 @@ Hex, Name, UWP, Remarks, Ix, Ex, Cx, N, B, Z, PBG, W, A, Stellar.
 <div class="editorial">
   <p>
     The <em class="product">Traveller</em> game in all forms is owned by Far
-Future Enterprises. Copyright &copy; 1977 &ndash; 2014 Far Future
+Future Enterprises. Copyright &copy; 1977 &ndash; 2015 Far Future
 Enterprises.
     <a href="http://farfuture.net/FFEFairUsePolicy2008.pdf">Fair Use Policy</a>
 </div>
 
 <!-- Google Analytics -->
 <script>
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-18610679-2']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-18610679-2', 'auto');
+  ga('send', 'pageview');
 </script>

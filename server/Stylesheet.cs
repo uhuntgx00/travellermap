@@ -42,21 +42,22 @@ namespace Maps.Rendering
     {
         None = 0x0000,
 
-        Type = 0x0001,
-        KeyNames = 0x0002,
-        Starport = 0x0004,
-        GasGiant = 0x0008,
-        Allegiance = 0x0010,
-        Bases = 0x0020,
-        Hex = 0x0040,
-        Zone = 0x0080,
-        AllNames = 0x0100,
-        Uwp = 0x0200,
-        Asteroids = 0x0400,
+        Type = 0x0001, // Show world type (water/no water/asteroid/unknown)
+        KeyNames = 0x0002, // Show HiPop/Capital names
+        Starport = 0x0004, // Show starport
+        GasGiant = 0x0008, // Show gas giant glyph
+        Allegiance = 0x0010, // Show allegiance code
+        Bases = 0x0020, // Show bases
+        Hex = 0x0040, // Include hex numbers
+        Zone = 0x0080, // Show Amber/Red zones
+        AllNames = 0x0100, // Show all world names, not just HiPop/Capitals
+        Uwp = 0x0200, // Show UWP below world name
+        Asteroids = 0x0400, // Render asteroids as pseudorandom ovals
+        Highlight = 0x0800, // Highlight (text font, text color) HiPopCapital worlds
 
         Dotmap = None,
-        Atlas = Type | KeyNames | Starport | GasGiant | Allegiance | Bases | Zone,
-        Poster = Type | KeyNames | Starport | GasGiant | Allegiance | Bases | Hex | Zone | AllNames | Asteroids,
+        Atlas = Type | KeyNames | Starport | GasGiant | Allegiance | Bases | Zone | Highlight,
+        Poster = Atlas | Hex | AllNames | Asteroids,
     }
 
     public enum TextBackgroundStyle
@@ -169,6 +170,12 @@ namespace Maps.Rendering
         Square,
         Curve,
     }
+    public enum HexStyle
+    {
+        None,
+        Hex,
+        Square,
+    }
 
     public class Stylesheet
     {
@@ -210,13 +217,15 @@ namespace Maps.Rendering
 
         private const float T5AllegianceCodeMinScale = 64;
 
-        public enum Style { Poster, Atlas, Candy, Print, Draft };
+        public enum Style { Poster, Atlas, Candy, Print, Draft, FASA };
 
         public Stylesheet(double scale, MapOptions options, Style style)
         {
             float onePixel = 1f / (float)scale;
 
             grayscale = false;
+            lightBackground = false;
+
             subsectorGrid.visible = ((scale >= SubsectorsMinScale) && options.HasFlag(MapOptions.SubsectorGrid));
             sectorGrid.visible = ((scale >= SectorGridMinScale) && options.HasFlag(MapOptions.SectorGrid));
             parsecGrid.visible = (scale >= ParsecMinScale);
@@ -237,15 +246,15 @@ namespace Maps.Rendering
 
             macroRoutes.visible = (scale >= MacroRouteMinScale) && (scale <= MacroRouteMaxScale);
             macroNames.visible = (scale >= MacroLabelMinScale) && (scale <= MacroLabelMaxScale);
-            // TODO: Turn these on
-            megaNames.visible = false && scale <= MegaLabelMaxScale;
+            megaNames.visible = scale <= MegaLabelMaxScale && ((options & MapOptions.NamesMask) != 0);
             showMicroNames = ((scale >= MicroNameMinScale) && ((options & MapOptions.NamesMask) != 0));
             capitals.visible = (scale >= MacroWorldsMinScale) && (scale <= MacroWorldsMaxScale);
 
-            microBorderStyle = (((options & MapOptions.ForceHexes) == 0) && (scale < ParsecHexMinScale))
-                ? MicroBorderStyle.Square
-                : MicroBorderStyle.Hex;
-
+            hexStyle = (((options & MapOptions.ForceHexes) == 0) && (scale < ParsecHexMinScale))
+                ? HexStyle.Square
+                : HexStyle.Hex;
+            microBorderStyle = hexStyle == HexStyle.Square ? MicroBorderStyle.Square : MicroBorderStyle.Hex;
+            
             macroBorders.visible = (scale >= MacroBorderMinScale) && (scale < MicroBorderMinScale) && ((options & MapOptions.BordersMask) != 0);
             microBorders.visible = (scale >= MicroBorderMinScale) && ((options & MapOptions.BordersMask) != 0);
             fillMicroBorders = microBorders.visible && options.HasFlag(MapOptions.FilledBorders);
@@ -344,7 +353,7 @@ namespace Maps.Rendering
             macroNames.smallFontInfo = new FontInfo(DEFAULT_FONT, 5f / 1.4f, XFontStyle.Regular);
             macroNames.mediumFontInfo = new FontInfo(DEFAULT_FONT, 6.5f / 1.4f, XFontStyle.Italic);
 
-            float megaNameScaleFactor = scale < 0.125 ? 30f : 10f;
+            float megaNameScaleFactor = 1.0f * onePixel;
             megaNames.fontInfo = new FontInfo(DEFAULT_FONT, 24f * megaNameScaleFactor, XFontStyle.Bold);
             megaNames.mediumFontInfo = new FontInfo(DEFAULT_FONT, 22f * megaNameScaleFactor, XFontStyle.Regular);
             megaNames.smallFontInfo = new FontInfo(DEFAULT_FONT, 20f * megaNameScaleFactor, XFontStyle.Italic);
@@ -395,7 +404,7 @@ namespace Maps.Rendering
             worlds.textStyle.Uppercase = false;
 
             useBackgroundImage = false;
-            useGalaxyImage = false;
+            useGalaxyImage = deepBackgroundOpacity > 0.0f;
             useWorldImages = false;
 
             // Cap pen widths when zooming in
@@ -425,14 +434,13 @@ namespace Maps.Rendering
                 case Style.Poster:
                     {
                         // This is the default - no changes
-                        useGalaxyImage = deepBackgroundOpacity > 0.0f;
                         break;
                     }
                 case Style.Atlas:
                     {
-                        deepBackgroundOpacity = 0f;
-
                         grayscale = true;
+                        lightBackground = true;
+
                         capitals.fillColor = Color.DarkGray;
                         capitals.textColor = Color.Black;
                         amberZone.pen.color = Color.LightGray;
@@ -462,9 +470,74 @@ namespace Maps.Rendering
 
                         break;
                     }
+                case Style.FASA:
+                    {
+                        useGalaxyImage = false;
+                        deepBackgroundOpacity = 0f;
+                        riftOpacity = 0;
+
+                        Color inkColor = Color.FromArgb(0x5C, 0x40, 0x33);
+
+                        foregroundColor = inkColor;
+                        backgroundColor = Color.White;
+
+                        grayscale = true; // TODO: Tweak to be "monochrome"
+                        lightBackground = true;
+
+                        capitals.fillColor = inkColor;
+                        capitals.textColor = inkColor;
+                        amberZone.pen.color = inkColor;
+                        amberZone.pen.width = onePixel * 2;
+                        blueZone.pen.color = inkColor; // TODO: make dashed
+                        redZone.pen.color = Color.Empty;
+                        redZone.fillColor = Color.FromArgb(0x80, inkColor);
+                        
+                        macroBorders.pen.color = inkColor;
+                        macroRoutes.pen.color = inkColor;
+                        
+                        microBorders.pen.color = inkColor;
+                        microBorders.pen.width = onePixel * 2;
+                        microBorders.fontInfo.size *= 0.6f;
+                        microBorders.fontInfo.style = XFontStyle.Regular;
+
+                        microRoutes.pen.color = inkColor;
+
+                        lightColor = Color.FromArgb(0x80, inkColor);
+                        darkColor = inkColor;
+                        dimColor = inkColor;
+                        highlightColor = inkColor;
+                        microBorders.textColor = inkColor;
+                        hexStyle = HexStyle.Hex;
+                        microBorderStyle = MicroBorderStyle.Curve;
+
+                        parsecGrid.pen.color = lightColor;
+                        sectorGrid.pen.color = lightColor;
+                        subsectorGrid.pen.color = lightColor;
+
+                        worldWater.fillColor = inkColor;
+                        worldNoWater.fillColor = inkColor;
+                        worldWater.pen.color = Color.Empty;
+                        worldNoWater.pen.color = Color.Empty;
+
+                        showWorldDetailColors = false;
+
+                        worldDetails = worldDetails & ~WorldDetails.Starport;
+                        worldDetails = worldDetails & ~WorldDetails.Allegiance;
+                        worldDetails = worldDetails & ~WorldDetails.Bases;
+                        worldDetails = worldDetails & ~WorldDetails.GasGiant;
+                        worldDetails = worldDetails & ~WorldDetails.Highlight;
+                        worlds.fontInfo.size *= 0.85f;
+                        worlds.textStyle.Translation = new PointF(0, 0.25f);
+
+                        numberAllHexes = true;
+                        hexCoordinateStyle = HexCoordinateStyle.Subsector;
+                        overrideLineStyle = LineStyle.Solid;
+
+                        break;
+                    }
                 case Style.Print:
                     {
-                        deepBackgroundOpacity = 0f;
+                        lightBackground = true;
 
                         foregroundColor = Color.Black;
                         backgroundColor = Color.White;
@@ -486,6 +559,9 @@ namespace Maps.Rendering
                 case Style.Draft:
                     {
                         int inkOpacity = 0xB0;
+
+                        useGalaxyImage = false;
+                        lightBackground = true;
 
                         deepBackgroundOpacity = 0f;
 
@@ -571,9 +647,8 @@ namespace Maps.Rendering
                         pseudoRandomStars.visible = false;
 
                         useBackgroundImage = deepBackgroundOpacity < 0.5f;
-                        useGalaxyImage = deepBackgroundOpacity > 0.0f;
 
-
+                        hexStyle = HexStyle.None;
                         microBorderStyle = MicroBorderStyle.Curve;
 
                         sectorGrid.visible = sectorGrid.visible && (scale >= 4);
@@ -715,6 +790,7 @@ namespace Maps.Rendering
         public float deepBackgroundOpacity;
 
         public bool grayscale;
+        public bool lightBackground;
 
         public bool showRifts;
         public float riftOpacity;
@@ -780,11 +856,13 @@ namespace Maps.Rendering
         public bool fillMicroBorders;
         public bool showMicroNames;
         public MicroBorderStyle microBorderStyle;
+        public HexStyle hexStyle;
+        public LineStyle? overrideLineStyle;
 
-        public void WorldColors(World world, out XColor penColor, out XColor brushColor)
+        public void WorldColors(World world, out XColor penColorOut, out XColor brushColorOut)
         {
-            penColor = XColor.Empty;
-            brushColor = XColor.Empty;
+            Color penColor = Color.Empty;
+            Color brushColor = Color.Empty;
 
             if (showWorldDetailColors)
             {
@@ -832,6 +910,9 @@ namespace Maps.Rendering
                 brushColor = (world.WaterPresent) ? worldWater.fillColor : worldNoWater.fillColor;
                 penColor = (world.WaterPresent) ? worldWater.pen.color : worldNoWater.pen.color;
             }
+
+            penColorOut = penColor.IsEmpty ? XColor.Empty : penColor;
+            brushColorOut = brushColor.IsEmpty ? XColor.Empty : brushColor;
         }
 
         public static float ScaleInterpolate(float minValue, float maxValue, double scale, float minScale, float maxScale)

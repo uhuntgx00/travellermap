@@ -17,12 +17,14 @@ window.addEventListener('DOMContentLoaded', function() {
   //////////////////////////////////////////////////////////////////////
 
   var mapElement = $('#dragContainer');
-  var map = new Map(mapElement);
+  var map = new Traveller.Map(mapElement);
 
   // Export
   window.map = map;
 
   var isIframe = (window != window.top); // != for IE
+  var isSmallScreen = mapElement.offsetWidth <= 640; // Arbitrary
+
 
   //////////////////////////////////////////////////////////////////////
   //
@@ -31,9 +33,9 @@ window.addEventListener('DOMContentLoaded', function() {
   //////////////////////////////////////////////////////////////////////
 
   // Tweak defaults
-  map.SetOptions(map.GetOptions() | MapOptions.NamesMinor | MapOptions.ForceHexes);
-  map.SetScale(mapElement.offsetWidth <= 640 ? 1 : 2);
-  map.CenterAtSectorHex(0, 0, Astrometrics.ReferenceHexX, Astrometrics.ReferenceHexY);
+  map.SetOptions(map.GetOptions() | Traveller.MapOptions.NamesMinor | Traveller.MapOptions.ForceHexes);
+  map.SetScale(isSmallScreen ? 1 : 2);
+  map.CenterAtSectorHex(0, 0, Traveller.Astrometrics.ReferenceHexX, Traveller.Astrometrics.ReferenceHexY);
   var defaults = {
     x: map.GetX(),
     y: map.GetY(),
@@ -49,29 +51,141 @@ window.addEventListener('DOMContentLoaded', function() {
     scale: defaults.scale
   };
 
+  var SAVE_PREFERENCES_DELAY_MS = 500;
+  var savePreferences = isIframe ? function() {} : Util.debounce(function() {
+    function maybeSave(test, key, data) {
+      if (test)
+        localStorage.setItem(key, JSON.stringify(data));
+      else
+        localStorage.removeItem(key);
+    }
+
+    var prefs = {
+      style: map.GetStyle(),
+      options: map.GetOptions(),
+      routes: map.GetNamedOption('routes'),
+      dimunofficial: map.GetNamedOption('dimunofficial')
+    };
+      PARAM_OPTIONS.forEach(function(option) {
+        prefs[option.param] = document.body.classList.contains(option.className);
+      });
+    maybeSave($('#cbSavePreferences').checked, 'preferences', prefs);
+    maybeSave($('#cbSaveLocation').checked, 'location', {
+      position: { x: map.GetX(), y: map.GetY() },
+      scale: map.GetScale()
+    });
+  }, SAVE_PREFERENCES_DELAY_MS);
+
+  var template = Util.memoize(function(sel) {
+    return Handlebars.compile($(sel).innerHTML);
+  });
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Permalink
+  //
+  //////////////////////////////////////////////////////////////////////
+
+  var PERMALINK_REFRESH_DELAY_MS = 500;
+  var lastPageURL = null;
+  var updatePermalink = Util.debounce(function() {
+    function round(n, d) {
+      d = 1 / d; // Avoid twitchy IEEE754 rounding.
+      return Math.round(n * d) / d;
+    }
+
+    urlParams.x = round(map.GetX(), 1/1000);
+    urlParams.y = round(map.GetY(), 1/1000);
+    urlParams.scale = round(map.GetScale(), 1/128);
+    urlParams.options = map.GetOptions();
+    urlParams.style = map.GetStyle();
+
+    var namedOptions = map.GetNamedOptionNames();
+    namedOptions.forEach(function(name) {
+      urlParams[name] = map.GetNamedOption(name);
+    });
+
+    delete urlParams.sector;
+    delete urlParams.hex;
+    ['x', 'y', 'options', 'scale', 'style'].concat(namedOptions).forEach(function(p) {
+      if (urlParams[p] === defaults[p]) delete urlParams[p];
+    });
+
+    PARAM_OPTIONS.forEach(function(option) {
+      if (document.body.classList.contains(option.className) === option['default'])
+        delete urlParams[option.param];
+      else
+        urlParams[option.param] = 1;
+    });
+
+    var pageURL = Util.makeURL(document.location, urlParams);
+
+    if (pageURL === lastPageURL)
+      return;
+
+    if ('history' in window && 'replaceState' in window.history && document.location.href !== pageURL)
+      window.history.replaceState(null, document.title, pageURL);
+
+    $('#share-url').value = pageURL;
+    $('#share-embed').value = '<iframe width=400 height=300 src="' + pageURL + '">';
+
+    var snapshotParams = (function() {
+      var map_center_x = map.GetX(),
+          map_center_y = map.GetY(),
+          scale = map.GetScale(),
+          rect = mapElement.getBoundingClientRect(),
+          width = Math.round(rect.width),
+          height = Math.round(rect.height),
+          x = ( map_center_x * scale - ( width / 2 ) ) / width,
+          y = ( -map_center_y * scale - ( height / 2 ) ) / height;
+      return { x: x, y: y, w: width, h: height, scale: scale };
+    }());
+    snapshotParams.x = round(snapshotParams.x, 1/1000);
+    snapshotParams.y = round(snapshotParams.y, 1/1000);
+    snapshotParams.scale = round(snapshotParams.scale, 1/128);
+    snapshotParams.options = map.GetOptions();
+    snapshotParams.style = map.GetStyle();
+    namedOptions.forEach(function(name) {
+      snapshotParams[name] = urlParams[name];
+    });
+    var snapshotURL = Traveller.MapService.makeURL('/api/tile', snapshotParams);
+    $('a#download-snapshot').href = snapshotURL;
+    snapshotParams.accept = 'application/pdf';
+    snapshotURL = Traveller.MapService.makeURL('/api/tile', snapshotParams);
+    $('a#download-snapshot-pdf').href = snapshotURL;
+
+  }, PERMALINK_REFRESH_DELAY_MS);
+
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // UI Binding
+  //
+  //////////////////////////////////////////////////////////////////////
+
   function setOptions(mask, flags) {
     map.SetOptions((map.GetOptions() & ~mask) | flags);
   }
 
   var optionObservers = [];
 
-  bindCheckedToOption('#ShowSectorGrid', MapOptions.GridMask);
-  bindCheckedToOption('#ShowSectorNames', MapOptions.SectorsMask);
-  bindEnabled('#ShowSelectedSectorNames', function(o) { return o & MapOptions.SectorsMask; });
+  bindCheckedToOption('#ShowSectorGrid', Traveller.MapOptions.GridMask);
+  bindCheckedToOption('#ShowSectorNames', Traveller.MapOptions.SectorsMask);
+  bindEnabled('#ShowSelectedSectorNames', function(o) { return o & Traveller.MapOptions.SectorsMask; });
   bindChecked('#ShowSelectedSectorNames',
-              function(o) { return o & MapOptions.SectorsSelected; },
-              function(c) { setOptions(MapOptions.SectorsMask, c ? MapOptions.SectorsSelected : 0); });
-  bindEnabled('#ShowAllSectorNames', function(o) { return o & MapOptions.SectorsMask; });
+              function(o) { return o & Traveller.MapOptions.SectorsSelected; },
+              function(c) { setOptions(Traveller.MapOptions.SectorsMask, c ? Traveller.MapOptions.SectorsSelected : 0); });
+  bindEnabled('#ShowAllSectorNames', function(o) { return o & Traveller.MapOptions.SectorsMask; });
   bindChecked('#ShowAllSectorNames',
-              function(o) { return o & MapOptions.SectorsAll; },
-              function(c) { setOptions(MapOptions.SectorsMask, c ? MapOptions.SectorsAll : 0); });
-  bindCheckedToOption('#ShowGovernmentBorders', MapOptions.BordersMask);
+              function(o) { return o & Traveller.MapOptions.SectorsAll; },
+              function(c) { setOptions(Traveller.MapOptions.SectorsMask, c ? Traveller.MapOptions.SectorsAll : 0); });
+  bindCheckedToOption('#ShowGovernmentBorders', Traveller.MapOptions.BordersMask);
   bindCheckedToNamedOption('#ShowRoutes', 'routes');
-  bindCheckedToOption('#ShowGovernmentNames', MapOptions.NamesMask);
-  bindCheckedToOption('#ShowImportantWorlds', MapOptions.WorldsMask);
-  bindCheckedToOption('#cbForceHexes', MapOptions.ForceHexes);
-  bindCheckedToOption('#cbWorldColors', MapOptions.WorldColors);
-  bindCheckedToOption('#cbFilledBorders',MapOptions.FilledBorders);
+  bindCheckedToOption('#ShowGovernmentNames', Traveller.MapOptions.NamesMask);
+  bindCheckedToOption('#ShowImportantWorlds', Traveller.MapOptions.WorldsMask);
+  bindCheckedToOption('#cbForceHexes', Traveller.MapOptions.ForceHexes);
+  bindCheckedToOption('#cbWorldColors', Traveller.MapOptions.WorldColors);
+  bindCheckedToOption('#cbFilledBorders',Traveller.MapOptions.FilledBorders);
   bindCheckedToNamedOption('#cbDimUnofficial', 'dimunofficial');
 
   function bindControl(selector, property, onChange, event, onEvent) {
@@ -101,14 +215,14 @@ window.addEventListener('DOMContentLoaded', function() {
 
   map.OnOptionsChanged = function(options) {
     optionObservers.forEach(function(o) { o(options); });
-    $('#legendBox').classList[(options & MapOptions.WorldColors) ? 'add' : 'remove']('world_colors');
+    $('#legendBox').classList[(options & Traveller.MapOptions.WorldColors) ? 'add' : 'remove']('world_colors');
     updatePermalink();
     updateSectorLinks();
     savePreferences();
   };
 
   map.OnStyleChanged = function(style) {
-    ['poster', 'atlas', 'print', 'candy', 'draft'].forEach(function(s) {
+    ['poster', 'atlas', 'print', 'candy', 'draft', 'fasa'].forEach(function(s) {
       document.body.classList[s === style ? 'add' : 'remove']('style-' + s);
     });
     updatePermalink();
@@ -148,12 +262,18 @@ window.addEventListener('DOMContentLoaded', function() {
   };
 
   // TODO: Generalize URLParam<->Control and URLParam<->Style binding
-  $('#ShowGalacticDirections').checked = true;
-  document.body.classList.add('show-directions');
-  $('#ShowGalacticDirections').addEventListener('click', function() {
-    document.body.classList[this.checked ? 'add' : 'remove']('show-directions');
-    updatePermalink();
-    savePreferences();
+  var PARAM_OPTIONS = [
+    {param: 'galdir', selector: '#cbGalDir', className: 'show-directions', 'default': true},
+    {param: 'tilt', selector: '#cbTilt', className: 'tilt', 'default': false}
+  ];
+  PARAM_OPTIONS.forEach(function(option) {
+    $(option.selector).checked = option['default'];
+    document.body.classList[option['default'] ? 'add' : 'remove'](option.className);
+    $(option.selector).addEventListener('click', function() {
+      document.body.classList[this.checked ? 'add' : 'remove'](option.className);
+      updatePermalink();
+      savePreferences();
+    });
   });
 
   (function() {
@@ -167,7 +287,11 @@ window.addEventListener('DOMContentLoaded', function() {
       ['routes', 'dimunofficial'].forEach(function(name) {
         if (name in preferences) map.SetNamedOption(name, preferences[name]);
       });
-      if ('galdir' in preferences) document.body.classList[preferences.galdir ? 'add' : 'remove']('show-directions');
+
+      PARAM_OPTIONS.forEach(function(option) {
+        if (option.param in preferences)
+          document.body.classList[preferences[option.param] ? 'add' : 'remove'](option.className);
+      });
     }
 
     if (location) {
@@ -177,32 +301,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   }());
 
-  var savePreferencesTimeout;
-  var SAVE_PREFERENCES_DELAY_MS = 500;
-  function savePreferences() {
-    if (isIframe) return;
-    if (savePreferencesTimeout) clearTimeout(savePreferencesTimeout);
-    savePreferencesTimeout = setTimeout(function() {
-      function maybeSave(test, key, data) {
-        if (test)
-          localStorage.setItem(key, JSON.stringify(data));
-        else
-          localStorage.removeItem(key);
-      }
-
-      maybeSave($('#cbSavePreferences').checked, 'preferences', {
-        style: map.GetStyle(),
-        options: map.GetOptions(),
-        routes: map.GetNamedOption('routes'),
-        dimunofficial: map.GetNamedOption('dimunofficial'),
-        galdir: document.body.classList.contains('show-directions') ? 1 : 0
-      });
-      maybeSave($('#cbSaveLocation').checked, 'location', {
-        position: { x: map.GetX(), y: map.GetY() },
-        scale: map.GetScale()
-      });
-    }, SAVE_PREFERENCES_DELAY_MS);
-  }
 
   $('#cbSavePreferences').addEventListener('click', savePreferences);
   $('#cbSaveLocation').addEventListener('click', savePreferences);
@@ -212,24 +310,31 @@ window.addEventListener('DOMContentLoaded', function() {
   //
   // Call this AFTER data binding is hooked up so UI is synchronized
   //
-  var urlParams = map.ApplyURLParameters();
+  var standalone = 'standalone' in window.navigator && window.navigator.standalone;
+  var urlParams = standalone ? {} : map.ApplyURLParameters();
 
   // Force UI to synchronize in case URL parameters didn't do it
   map.OnOptionsChanged(map.GetOptions());
 
   if (isIframe) {
     var forceui = ('forceui' in urlParams) && Boolean(Number(urlParams.forceui));
-    if (!forceui)
-      document.body.classList.add('hide-ui');
-    document.body.classList.add('hide-footer');
+    if (forceui)
+      document.body.classList.remove('hide-ui');
+  } else {
+    document.body.classList.remove('hide-ui');
+    document.body.classList.remove('hide-footer');
   }
 
-  if ('galdir' in urlParams) {
-    var show = Boolean(Number(urlParams.galdir));
-    document.body.classList[show ? 'add' : 'remove']('show-directions');
-    updatePermalink();
-  }
-  $('#ShowGalacticDirections').checked = document.body.classList.contains('show-directions');
+  var dirty = false;
+  PARAM_OPTIONS.forEach(function(option) {
+    if (option.param in urlParams) {
+      var show = Boolean(Number(urlParams[option.param]));
+      document.body.classList[show ? 'add' : 'remove'](option.className);
+      dirty = true;
+    }
+    $(option.selector).checked = document.body.classList.contains(option.className);
+  });
+  if (dirty) updatePermalink();
 
   if ('q' in urlParams) {
     $('#searchBox').value = urlParams.q;
@@ -251,95 +356,29 @@ window.addEventListener('DOMContentLoaded', function() {
 
   $('#homeBtn').addEventListener('click', goHome);
 
+  $('#tiltBtn').addEventListener('click', toggleTilt);
+
+  function toggleTilt() {
+    $('#cbTilt').click();
+  };
+
   mapElement.addEventListener('keydown', function(e) {
     if (e.ctrlKey || e.altKey || e.metaKey)
       return;
-    var VK_H = 72;
+    var VK_H = 72, VK_T = 84;
     if (e.keyCode === VK_H) {
       e.preventDefault();
       e.stopPropagation();
       goHome();
       return;
     }
+    if (e.keyCode === VK_T) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleTilt();
+      return;
+    }
   });
-
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Permalink
-  //
-  //////////////////////////////////////////////////////////////////////
-
-  var permalinkTimeout = 0;
-  var lastPageURL = null;
-  function updatePermalink() {
-    var PERMALINK_REFRESH_DELAY_MS = 500;
-    if (permalinkTimeout)
-      clearTimeout(permalinkTimeout);
-    permalinkTimeout = setTimeout(function() {
-
-      function round(n, d) {
-        d = 1 / d; // Avoid twitchy IEEE754 rounding.
-        return Math.round(n * d) / d;
-      }
-
-      urlParams.x = round(map.GetX(), 1/1000);
-      urlParams.y = round(map.GetY(), 1/1000);
-      urlParams.scale = round(map.GetScale(), 1/128);
-      urlParams.options = map.GetOptions();
-      urlParams.style = map.GetStyle();
-
-      map.GetNamedOptionNames().forEach(function(name) {
-        urlParams[name] = map.GetNamedOption(name);
-      });
-
-      delete urlParams.sector;
-      delete urlParams.hex;
-      ['x', 'y', 'options', 'scale', 'style', 'routes', 'dimunofficial'].forEach(function(p) {
-        if (urlParams[p] === defaults[p]) delete urlParams[p];
-      });
-
-      if (document.body.classList.contains('show-directions'))
-        delete urlParams.galdir;
-      else
-        urlParams.galdir = 0;
-
-      var pageURL = makeURL(document.location, urlParams);
-
-      if (pageURL === lastPageURL)
-        return;
-
-      if ('history' in window && 'replaceState' in window.history && document.location.href !== pageURL)
-          window.history.replaceState(null, document.title, pageURL);
-
-      $('#share-url').value = pageURL;
-      $('#share-embed').value = '<iframe width=400 height=300 src="' + pageURL + '">';
-
-      var snapshotParams = (function() {
-        var map_center_x = map.GetX(),
-            map_center_y = map.GetY(),
-            scale = map.GetScale(),
-            rect = mapElement.getBoundingClientRect(),
-            width = rect.width,
-            height = rect.height,
-            x = ( map_center_x * scale - ( width / 2 ) ) / width,
-            y = ( -map_center_y * scale - ( height / 2 ) ) / height;
-        return { x: x, y: y, w: width, h: height, scale: scale };
-      }());
-      snapshotParams.x = round(snapshotParams.x, 1/1000);
-      snapshotParams.y = round(snapshotParams.y, 1/1000);
-      snapshotParams.scale = round(snapshotParams.scale, 1/128);
-      snapshotParams.options = map.GetOptions();
-      snapshotParams.style = map.GetStyle();
-      snapshotParams.routes = urlParams.routes;
-      snapshotParams.dimunofficial = urlParams.dimunofficial;
-      var snapshotURL = makeURL(SERVICE_BASE + '/api/tile', snapshotParams);
-      $('a#download-snapshot').href = snapshotURL;
-      snapshotParams.accept = 'application/pdf';
-      snapshotURL = makeURL(SERVICE_BASE + '/api/tile', snapshotParams);
-      $('a#download-snapshot-pdf').href = snapshotURL;
-
-    }, PERMALINK_REFRESH_DELAY_MS);
-  }
 
 
   //////////////////////////////////////////////////////////////////////
@@ -347,11 +386,6 @@ window.addEventListener('DOMContentLoaded', function() {
   // Metadata
   //
   //////////////////////////////////////////////////////////////////////
-
-  var commonMetadataTemplate = Handlebars.compile($('#CommonMetadataTemplate').innerHTML);
-  var statusMetadataTemplate = Handlebars.compile($('#StatusMetadataTemplate').innerHTML);
-  var worldMetadataTemplate = Handlebars.compile($('#WorldMetadataTemplate').innerHTML);
-  var sectorMetadataTemplate = Handlebars.compile($('#SectorMetadataTemplate').innerHTML);
 
   var dataRequest = null;
   var dataTimeout = 0;
@@ -365,7 +399,7 @@ window.addEventListener('DOMContentLoaded', function() {
       return;
 
     if (dataRequest) {
-      dataRequest.abort();
+      dataRequest.ignore();
       dataRequest = null;
     }
 
@@ -376,11 +410,11 @@ window.addEventListener('DOMContentLoaded', function() {
       lastX = hexX;
       lastY = hexY;
 
-      dataRequest = MapService.credits(hexX, hexY, function(data) {
-        dataRequest = null;
-        displayResults(data);
-      }, function() {
-      });
+      dataRequest = Util.ignorable(Traveller.MapService.credits(hexX, hexY));
+      dataRequest.then(function(data) {
+          dataRequest = null;
+          displayResults(data);
+        });
 
     }, immediate ? 0 : DATA_REQUEST_DELAY_MS);
 
@@ -388,7 +422,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if ('SectorTags' in data) {
         var tags =  String(data.SectorTags).split(/\s+/);
         data.Unofficial = true;
-        ['Official', 'Unreviewed', 'Apocryphal', 'Preserve'].forEach(function(tag) {
+        ['Official', 'InReview', 'Unreviewed', 'Apocryphal', 'Preserve'].forEach(function(tag) {
           if (tags.indexOf(tag) !== -1) {
             delete data.Unofficial;
             data[tag] = true;
@@ -420,9 +454,10 @@ window.addEventListener('DOMContentLoaded', function() {
         $('#downloadBox').classList.remove('world-selected');
       }
 
-      var template = selectedWorld ? worldMetadataTemplate : sectorMetadataTemplate;
       $('#MetadataDisplay').innerHTML =
-        template(data) + commonMetadataTemplate(data) + statusMetadataTemplate(data);
+        template(selectedWorld ? '#WorldMetadataTemplate' : '#SectorMetadataTemplate')(data)
+        + template('#CommonMetadataTemplate')(data)
+        + template('#StatusMetadataTemplate')(data);
     }
   }
 
@@ -430,22 +465,21 @@ window.addEventListener('DOMContentLoaded', function() {
     if (!selectedSector)
       return;
 
-    var bookletURL = SERVICE_BASE +
-          '/data/' + encodeURIComponent(selectedSector) + '/booklet';
-    var posterURL = makeURL(SERVICE_BASE + '/api/poster', {
+    var bookletURL = Traveller.MapService.makeURL(
+          '/data/' + encodeURIComponent(selectedSector) + '/booklet');
+    var posterURL = Traveller.MapService.makeURL('/api/poster', {
       sector: selectedSector, accept: 'application/pdf', style: map.GetStyle()});
-    var dataURL = makeURL(SERVICE_BASE + '/api/sec', {
+    var dataURL = Traveller.MapService.makeURL('/api/sec', {
       sector: selectedSector, type: 'SecondSurvey' });
 
-
     var title = selectedSector.replace(/ Sector$/, '') + ' Sector';
-    $('#downloadBox #sector-name').innerHTML = escapeHtml(title);
+    $('#downloadBox #sector-name').innerHTML = Util.escapeHTML(title);
     $('#downloadBox a#download-booklet').href = bookletURL;
     $('#downloadBox a#download-poster').href = posterURL;
     $('#downloadBox a#download-data').href = dataURL;
 
     if (selectedWorld) {
-      var worldURL = makeURL('world.html', {
+      var worldURL = Util.makeURL('world.html', {
         sector: selectedSector,
         hex: selectedWorld.hex
       });
@@ -455,11 +489,11 @@ window.addEventListener('DOMContentLoaded', function() {
         selectedWorld.name + ' (' + selectedWorld.hex + ')';
 
       var options = map.GetOptions() & (
-        MapOptions.BordersMask | MapOptions.NamesMask |
-          MapOptions.WorldColors | MapOptions.FilledBorders);
+        Traveller.MapOptions.BordersMask | Traveller.MapOptions.NamesMask |
+          Traveller.MapOptions.WorldColors | Traveller.MapOptions.FilledBorders);
 
       for (var j = 1; j <= 6; ++j) {
-        var jumpMapURL = makeURL(SERVICE_BASE + '/api/jumpmap', {
+        var jumpMapURL = Traveller.MapService.makeURL('/api/jumpmap', {
           sector: selectedSector,
           hex: selectedWorld.hex,
           jump: j,
@@ -476,8 +510,6 @@ window.addEventListener('DOMContentLoaded', function() {
   // Search
   //
   //////////////////////////////////////////////////////////////////////
-
-  var searchTemplate = Handlebars.compile($('#SearchResultsTemplate').innerHTML);
 
   var searchRequest = null;
   var lastQuery = null;
@@ -505,19 +537,21 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 
     if (searchRequest)
-      searchRequest.abort();
+      searchRequest.ignore();
 
-    searchRequest = MapService.search(query, function(data) {
-      searchRequest = null;
-      displayResults(data);
-      document.body.classList.remove('search-progress');
-      document.body.classList.add('search-results');
-    }, function() {
-      searchRequest = null;
-      $('#resultsContainer').innerHTML = '<i>Error fetching results.</i>';
-      document.body.classList.remove('search-progress');
-      document.body.classList.add('search-results');
-    });
+    searchRequest = Util.ignorable(Traveller.MapService.search(query));
+    searchRequest
+      .then(function(data) {
+        searchRequest = null;
+        displayResults(data);
+        document.body.classList.remove('search-progress');
+        document.body.classList.add('search-results');
+      }, function() {
+        searchRequest = null;
+        $('#resultsContainer').innerHTML = '<i>Error fetching results.</i>';
+        document.body.classList.remove('search-progress');
+        document.body.classList.add('search-results');
+      });
 
     // Transform the search results into clickable links
     function displayResults(data) {
@@ -527,7 +561,7 @@ window.addEventListener('DOMContentLoaded', function() {
         if ('SectorTags' in item) {
           var tags = String(item.SectorTags).split(/\s+/);
           item.Unofficial = true;
-          ['Official', 'Unreviewed', 'Apocryphal', 'Preserve'].forEach(function(tag) {
+          ['Official', 'InReview', 'Unreviewed', 'Apocryphal', 'Preserve'].forEach(function(tag) {
             if (tags.indexOf(tag) !== -1) {
               delete item.Unofficial;
               item[tag] = true;
@@ -552,19 +586,19 @@ window.addEventListener('DOMContentLoaded', function() {
             n = (index.charCodeAt(0) - 'A'.charCodeAt(0));
           sx = subsector.SectorX|0;
           sy = subsector.SectorY|0;
-          hx = (((n % 4) | 0) + 0.5) * (Astrometrics.SectorWidth / 4);
-          hy = (((n / 4) | 0) + 0.5) * (Astrometrics.SectorHeight / 4);
+          hx = (((n % 4) | 0) + 0.5) * (Traveller.Astrometrics.SectorWidth / 4);
+          hy = (((n / 4) | 0) + 0.5) * (Traveller.Astrometrics.SectorHeight / 4);
           scale = subsector.Scale || 32;
-          subsector.href = makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
+          subsector.href = Util.makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
           applyTags(subsector);
         } else if (item.Sector) {
           var sector = item.Sector;
           sx = sector.SectorX|0;
           sy = sector.SectorY|0;
-          hx = (Astrometrics.SectorWidth / 2);
-          hy = (Astrometrics.SectorHeight / 2);
+          hx = (Traveller.Astrometrics.SectorWidth / 2);
+          hy = (Traveller.Astrometrics.SectorHeight / 2);
           scale = sector.Scale || 8;
-          sector.href = makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
+          sector.href = Util.makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
           applyTags(sector);
         } else if (item.World) {
           var world = item.World;
@@ -575,17 +609,17 @@ window.addEventListener('DOMContentLoaded', function() {
           hy = world.HexY|0;
           world.Hex = pad2(hx) + pad2(hy);
           scale = world.Scale || 64;
-          world.href = makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
+          world.href = Util.makeURL(base_url, {scale: scale, sx: sx, sy: sy, hx: hx, hy: hy});
           applyTags(world);
         }
       }
 
-      $('#resultsContainer').innerHTML = searchTemplate(data);
+      $('#resultsContainer').innerHTML = template('#SearchResultsTemplate')(data);
 
       [].forEach.call(document.querySelectorAll('#resultsContainer a'), function(a) {
         a.addEventListener('click', function(e) {
           e.preventDefault();
-          var params = window.parseURLQuery(e.target);
+          var params = Util.parseURLQuery(e.target);
           map.ScaleCenterAtSectorHex(params.scale|0, params.sx|0, params.sy|0, params.hx|0, params.hy|0);
           if (mapElement.offsetWidth < 640)
             document.body.classList.remove('search-results');
@@ -615,13 +649,13 @@ window.addEventListener('DOMContentLoaded', function() {
 
     cancelAnimationFrame(animId);
     animId = requestAnimationFrame(function() {
-      var scale = map.GetScale() * Astrometrics.ParsecScaleX,
+      var scale = map.GetScale(),
           canvas = $('#scaleIndicator'),
           ctx = canvas.getContext('2d'),
           w = parseFloat(canvas.width),
           h = parseFloat(canvas.height),
           style = map.GetStyle(),
-          color = ['atlas', 'print', 'draft'].indexOf(style) !== -1 ? 'black' : 'white';
+          color = ['atlas', 'print', 'draft', 'fasa'].indexOf(style) !== -1 ? 'black' : 'white';
 
       ctx.clearRect(0, 0, w, h);
 
@@ -649,6 +683,28 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   updateScaleIndicator();
 
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Popup Displays
+  //
+  //////////////////////////////////////////////////////////////////////
+
+  window.showWorldPopup = function(url) {
+    if (isSmallScreen) return true;
+    $('#popup-iframe').src = url;
+    $('#popup-iframe').onload = function() {
+      $('#popup-overlay').classList.add('visible');
+      $('#popup-click').focus();
+    };
+    return false;
+  };
+  ['click', 'keydown', 'touchstart'].forEach(function(event) {
+    $('#popup-click').addEventListener(event, function(e) {
+      e.preventDefault();
+      $('#popup-overlay').classList.remove('visible');
+      mapElement.focus();
+    });
+  });
 
   //////////////////////////////////////////////////////////////////////
   //

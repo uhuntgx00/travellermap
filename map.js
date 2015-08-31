@@ -2,85 +2,128 @@
 // Exported Functionality
 // ======================================================================
 
-var SERVICE_BASE = (function(l) {
-  'use strict';
-  if (l.hostname === 'localhost' && l.pathname.indexOf('~') !== -1)
-    return 'http://travellermap.com';
-  return '';
-}(window.location));
-
-var LEGACY_STYLES = true;
-
 // NOTE: Used by other scripts
-function parseURLQuery(url) {
-  'use strict';
-  var o = Object.create(null);
-  if (url.search && url.search.length > 1) {
-    url.search.substring(1).split('&').forEach(function(pair) {
-      if (!pair) return;
-      var kv = pair.split('=', 2);
-      if (kv.length === 2)
-        o[kv[0]] = decodeURIComponent(kv[1].replace(/\+/g, ' '));
-      else
-        o[kv[0]] = true;
-    });
-  }
-  return o;
-}
+var Util = {
+  makeURL: function(base, params) {
+    'use strict';
+    base = String(base).replace(/\?.*/, '');
+    if (!params) return base;
+    var keys = Object.keys(params);
+    if (keys.length === 0) return base;
+    return base += '?' + keys.filter(function(p) {
+      return params[p] !== undefined;
+    }).map(function(p) {
+      return encodeURIComponent(p) + '=' + encodeURIComponent(params[p]);
+    }).join('&');
+  },
 
-// NOTE: Used by other scripts
-function getUrlParameters() {
-  'use strict';
-  return parseURLQuery(document.location);
-}
-
-
-// NOTE: Needs to be exported
-function applyUrlParameters(map) {
-  'use strict';
-  return map.ApplyURLParameters();
-}
-
-// NOTE: Used by other scripts
-function escapeHtml(s) {
-  'use strict';
-  return s.replace(/[&<>"']/g, function(c) {
-    switch (c) {
-    case '&': return '&amp;';
-    case '<': return '&lt;';
-    case '>': return '&gt;';
-    case '"': return '&quot;';
-    case "'": return '&#39;';
-    default: return c;
+  // Replace with URL/searchParams
+  parseURLQuery: function(url) {
+    'use strict';
+    var o = Object.create(null);
+    if (url.search && url.search.length > 1) {
+      url.search.substring(1).split('&').forEach(function(pair) {
+        if (!pair) return;
+        var kv = pair.split('=', 2);
+        if (kv.length === 2)
+          o[kv[0]] = decodeURIComponent(kv[1].replace(/\+/g, ' '));
+        else
+          o[kv[0]] = true;
+      });
     }
-  });
-}
+    return o;
+  },
 
-// NOTE: Used by other scripts
-function makeURL(base, params) {
-  'use strict';
-  base = String(base).replace(/\?.*/, '');
-  var keys = Object.keys(params);
-  if (keys.length === 0) return base;
-  return base += '?' + keys.filter(function (p) {
-    return params[p] !== undefined;
-  }).map(function (p) {
-    return encodeURIComponent(p) + '=' + encodeURIComponent(params[p]);
-  }).join('&');
-}
+  escapeHTML: function(s) {
+    'use strict';
+    return String(s).replace(/[&<>"']/g, function(c) {
+      switch (c) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#39;';
+      default: return c;
+      }
+    });
+  },
 
-(function (global) {
+  once: function(func) {
+    var run = false;
+    return function() {
+      if (run) return;
+      run = true;
+      func.apply(this, arguments);
+    };
+  },
+
+  debounce: function(func, delay, immediate) {
+    var timeoutId = 0;
+    if (immediate) {
+      return function() {
+        if (timeoutId)
+          clearTimeout(timeoutId);
+        else
+          func.apply(this, arguments);
+        timeoutId = setTimeout(function() { timeoutId = 0; }, delay);
+      };
+    } else {
+      return function() {
+        var $this = this, $arguments = arguments;
+        if (timeoutId)
+          clearTimeout(timeoutId);
+        timeoutId = setTimeout(function() {
+          func.apply($this, $arguments);
+          timeoutId = 0;
+        }, delay);
+      };
+    }
+  },
+
+  memoize: function(f) {
+    var cache = Object.create(null);
+    return function() {
+      var key = JSON.stringify([].slice.call(arguments));
+      return (key in cache) ? cache[key] : cache[key] = f.apply(this, arguments);
+    };
+  },
+
+  // p = ignorable(other_promise);
+  // p.then(...);
+  // p.ignore(); // p will neither resolve nor reject
+  // WARNING: p = ignorable(...).then(...); p.ignore(); will fail
+  // (Promise subclassing is not used)
+  ignorable: function(p) {
+    var ignored = false;
+    var q = new Promise(function(resolve, reject) {
+      p.then(function(r) { if (!ignored) resolve(r); },
+             function(r) { if (!ignored) reject(r); });
+    });
+    q.ignore = function() { ignored = true; };
+    return q;
+  }
+};
+
+
+(function(global) {
   'use strict';
 
   //----------------------------------------------------------------------
   // General Traveller stuff
   //----------------------------------------------------------------------
 
-  var Traveller = {
-    fromHex: function(c) {
-      return '0123456789ABCDEFGHJKLMNPQRSTUVW'.indexOf(c.toUpperCase());
-    }
-  };
+  var SERVICE_BASE = (function(l) {
+    'use strict';
+    if (l.hostname === 'localhost' && l.pathname.indexOf('~') !== -1)
+      return 'http://travellermap.com';
+    return '';
+  }(window.location));
+
+  var LEGACY_STYLES = true;
+
+  function fromHex(c) {
+    return '0123456789ABCDEFGHJKLMNPQRSTUVW'.indexOf(c.toUpperCase());
+  }
 
   //----------------------------------------------------------------------
   // Enumerated types
@@ -118,6 +161,7 @@ function makeURL(base, params) {
     Print: 'print',
     Candy: 'candy',
     Draft: 'draft',
+    FASA: 'fasa'
   };
 
   //----------------------------------------------------------------------
@@ -137,165 +181,6 @@ function makeURL(base, params) {
     MaxScale: 512
   };
 
-  // ======================================================================
-  // Data Services
-  // ======================================================================
-
-  var MapService = (function() {
-
-    function service(url, contentType, callback, errback) {
-      if (typeof callback !== 'function') throw new TypeError();
-
-      var xhr = new XMLHttpRequest();
-      try {
-        xhr.open('GET', url, true);
-        // Due to proxies/user-agents not respecting Vary tags, switch to URL params instead of headers.
-        xhr.setRequestHeader('Accept', contentType);
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState !== XMLHttpRequest.DONE)
-            return;
-          if (xhr.status === 200) {
-            var data = xhr.responseText;
-            try {
-              if (contentType === 'application/json')
-                data = JSON.parse(data);
-            } catch (ex) {
-              errback(ex);
-              return;
-            }
-            callback(data);
-            return;
-          }
-          if (errback)
-            errback(xhr.status);
-        };
-        var original_abort = xhr.abort;
-        xhr.abort = function() {
-          xhr.onreadystatechange = null;
-          if (original_abort)
-            original_abort.call(xhr);
-        };
-        xhr.send();
-        return xhr;
-      } catch (ex) {
-        // If cross-domain, blocked by browsers that don't implement CORS
-        setTimeout(function () {
-          if (errback)
-            errback(ex.message);
-        }, 0);
-        return {
-          abort: function() {},
-          readyState: XMLHttpRequest.DONE,
-          status: 0,
-          statusText: 'Forbidden',
-          responseText: 'Connection error'
-        };
-      }
-    }
-
-    return {
-      coordinates: function(sector, hex, callback, errback, options) {
-        options = options || {};
-        options.sector = sector;
-        options.hex = hex;
-        return service(makeURL(SERVICE_BASE + '/api/coordinates', options),
-                       options.accept || 'application/json', callback, errback);
-      },
-
-      credits: function (hexX, hexY, callback, errback, options) {
-        options = options || {};
-        options.x = hexX;
-        options.y = hexY;
-        return service(makeURL(SERVICE_BASE + '/api/credits', options),
-                       options.accept || 'application/json', callback, errback);
-      },
-
-      search: function (query, callback, errback, options) {
-        options = options || {};
-        options.q = query;
-        return service(makeURL(SERVICE_BASE + '/api/search', options),
-                       options.accept || 'application/json', callback, errback);
-      },
-
-      sectorData: function (sector, callback, errback, options) {
-        options = options || {};
-        options.sector = sector;
-        return service(makeURL(SERVICE_BASE + '/api/sec', options),
-                       options.accept || 'text/plain', callback, errback);
-      },
-
-      sectorDataTabDelimited: function (sector, callback, errback, options) {
-        options = options || {};
-        options.sector = sector;
-        options.type = 'TabDelimited';
-        return service(makeURL(SERVICE_BASE + '/api/sec', options),
-                       options.accept || 'text/plain', callback, errback);
-      },
-
-      sectorMetaData: function (sector, callback, errback, options) {
-        options = options || {};
-        options.sector = sector;
-        return service(makeURL(SERVICE_BASE + '/api/metadata', options),
-                       options.accept || 'application/json', callback, errback);
-      },
-
-      MSEC: function (sector, callback, errback, options) {
-        options = options || {};
-        options.sector = sector;
-        return service(makeURL(SERVICE_BASE + '/api/msec', options),
-                       options.accept || 'text/plain', callback, errback);
-      },
-
-      universe: function (callback, errback, options) {
-        options = options || {};
-        return service(makeURL(SERVICE_BASE + '/api/universe', options),
-                       options.accept || 'application/json', callback, errback);
-      }
-    };
-  }());
-
-  // ======================================================================
-  // Least-Recently-Used Cache
-  // ======================================================================
-
-  var LRUCache = function(capacity) {
-    this.capacity = capacity;
-    this.cache = {};
-    this.queue = [];
-
-    this.clear = function() {
-      this.cache = [];
-      this.queue = [];
-    };
-
-    this.fetch = function(key) {
-      var value = this.cache[key];
-      if (value === undefined)
-        return undefined;
-
-      var index = this.queue.indexOf(key);
-      if (index !== -1)
-        this.queue.splice(index, 1);
-      this.queue.push(key);
-      return value;
-    };
-
-    this.insert = function(key, value) {
-      // Remove previous instances
-      var index = this.queue.indexOf(key);
-      if (index !== -1)
-        this.queue.splice(index, 1);
-
-      this.cache[key] = value;
-      this.queue.push(key);
-
-      while (this.queue.length > this.capacity) {
-        key = this.queue.shift();
-        delete this.cache[key];
-      }
-    };
-  };
-
   var Defaults = {
     options:
     MapOptions.SectorGrid | MapOptions.SubsectorGrid |
@@ -307,30 +192,185 @@ function makeURL(base, params) {
     style: Styles.Poster
   };
 
+  var styleLookup = (function() {
+    var sheets = {};
+    var base = {
+      overlay_color: '#8080ff',
+      you_are_here_url: 'res/ui/youarehere.png'
+    };
+    sheets[Styles.Poster] = base;
+    sheets[Styles.Candy] = base;
+    sheets[Styles.Draft] = base;
+    sheets[Styles.Atlas] = Object.assign({}, base, {
+      overlay_color: '#808080',
+      you_are_here_url: 'res/ui/youarehere_gray.png'
+    });
+    sheets[Styles.FASA] = sheets[Styles.Print] =
+      Object.assign({}, base, {
+        you_are_here_url: 'res/ui/youarehere_gray.png'
+      });
+
+    return function(style, property) {
+      var sheet = sheets[style] || sheets[Defaults.style];
+      return sheet[property];
+    };
+  }());
+
+
   // ======================================================================
-  // Helper functions to normalize behavior across event models
+  // Data Services
   // ======================================================================
 
-  var DOMHelpers = {
-    setCapture: function(element) {
-      // Prevents click events in FF (?!?)
-      var isIE = navigator.userAgent.indexOf('MSIE') !== -1;
-      if (isIE && 'setCapture' in element)
-        element.setCapture(true);
+  var MapService = (function() {
+    function service(url, contentType) {
+      return fetch(url, {headers: {Accept: contentType}})
+        .then(function(response) {
+          if (!response.ok)
+            throw Error(response.statusText);
+          return (contentType === 'application/json') ?
+            response.json() : response.text();
+        });
+    }
+
+    function url(path, options) {
+      return Util.makeURL(SERVICE_BASE + path, options);
+    }
+
+    return {
+      makeURL: function(path, options) {
+        return url(path, options);
+      },
+
+      coordinates: function(sector, hex, options) {
+        options = Object.assign({}, options, {sector: sector, hex: hex});
+        return service(url('/api/coordinates', options),
+                       options.accept || 'application/json');
+      },
+
+      credits: function(hexX, hexY, options) {
+        options = Object.assign({}, options, {x: hexX, y: hexY});
+        return service(url('/api/credits', options),
+                       options.accept || 'application/json');
+      },
+
+      search: function(query, options) {
+        options = Object.assign({}, options, {q: query});
+        return service(url('/api/search', options),
+                       options.accept || 'application/json');
+      },
+
+      sectorData: function(sector, options) {
+        options = Object.assign({}, options, {sector: sector});
+        return service(url('/api/sec', options),
+                       options.accept || 'text/plain');
+      },
+
+      sectorDataTabDelimited: function(sector, options) {
+        options = Object.assign({}, options, {sector: sector, type: 'TabDelimited'});
+        return service(url('/api/sec', options),
+                       options.accept || 'text/plain');
+      },
+
+      sectorMetaData: function(sector, options) {
+        options = Object.assign({}, options, {sector: sector});
+        return service(url('/api/metadata', options),
+                       options.accept || 'application/json');
+      },
+
+      MSEC: function(sector, options) {
+        options = Object.assign({}, options, {sector: sector});
+        return service(url('/api/msec', options),
+                       options.accept || 'text/plain');
+      },
+
+      universe: function(options) {
+        options = Object.assign({}, options);
+        return service(url('/api/universe', options),
+                       options.accept || 'application/json');
+      }
+    };
+  }());
+
+  // ======================================================================
+  // Least-Recently-Used Cache
+  // ======================================================================
+
+  function LRUCache(capacity) {
+    this.capacity = capacity;
+    this.map = {};
+    this.queue = [];
+  }
+  LRUCache.prototype = {
+    ensureCapacity: function(capacity) {
+      if (this.capacity < capacity)
+        this.capacity = capacity;
     },
-    releaseCapture: function(element) {
-      var isIE = navigator.userAgent.indexOf('MSIE') !== -1;
-      if (isIE && 'releaseCapture' in element)
-        element.releaseCapture();
+
+    clear: function() {
+      this.map = {};
+      this.queue = [];
+    },
+
+    fetch: function(key) {
+      key = '$' + key;
+      var value = this.map[key];
+      if (value === undefined)
+        return undefined;
+
+      var index = this.queue.indexOf(key);
+      if (index !== -1)
+        this.queue.splice(index, 1);
+      this.queue.push(key);
+      return value;
+    },
+
+    insert: function(key, value) {
+      key = '$' + key;
+      // Remove previous instances
+      var index = this.queue.indexOf(key);
+      if (index !== -1)
+        this.queue.splice(index, 1);
+
+      this.map[key] = value;
+      this.queue.push(key);
+
+      while (this.queue.length > this.capacity) {
+        key = this.queue.shift();
+        delete this.map[key];
+      }
     }
   };
+
+  // ======================================================================
+  // Image Stash
+  // ======================================================================
+
+  function ImageStash() {
+    this.map = new Map();
+  }
+  ImageStash.prototype = {
+    get: function(url, callback) {
+      if (!this.map.has(url)) {
+        var image = document.createElement('img');
+        image.src = url;
+        this.map.set(url, image);
+        image.onload = function() {
+          image.loaded = true;
+          callback(image);
+        };
+      }
+      image = this.map.get(url);
+      return image.loaded ? image : undefined;
+    }
+  };
+  var stash = new ImageStash();
+
 
   // ======================================================================
   // Animation Utilities
   // ======================================================================
 
   var Animation = (function() {
-
     function isCallable(o) {
       return typeof o === 'function';
     }
@@ -340,10 +380,13 @@ function makeURL(base, params) {
     // smooth = optional smoothing function
     // set onanimate to function called with animation position (0.0 ... 1.0)
     //
-    var Animation = function(dur, smooth) {
+    function Animation(dur, smooth) {
       var start = Date.now();
-      var self = this;
+      var $this = this;
       this.timerid = requestAnimationFrame(tickFunc);
+      this.onanimate = null;
+      this.oncancel = null;
+      this.oncomplete = null;
 
       function tickFunc() {
         var f = (Date.now() - start) / 1000 / dur;
@@ -354,19 +397,21 @@ function makeURL(base, params) {
         if (isCallable(smooth))
           p = smooth(p);
 
-        if (isCallable(self.onanimate))
-          self.onanimate(p);
+        if (isCallable($this.onanimate))
+          $this.onanimate(p);
 
-        if (f >= 1.0 && isCallable(self.oncomplete))
-          self.oncomplete();
+        if (f >= 1.0 && isCallable($this.oncomplete))
+          $this.oncomplete();
       }
-    };
+    }
 
-    Animation.prototype.cancel = function() {
-      if (this.timerid) {
-        cancelAnimationFrame(this.timerid);
-        if (isCallable(this.oncancel))
-          this.oncancel();
+    Animation.prototype = {
+      cancel: function() {
+        if (this.timerid) {
+          cancelAnimationFrame(this.timerid);
+          if (isCallable(this.oncancel))
+            this.oncancel();
+        }
       }
     };
 
@@ -477,9 +522,18 @@ function makeURL(base, params) {
     }
   }
 
-  function eventCoordsToLocal(event, element) {
-    var rect = element.getBoundingClientRect();
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  function eventCoords(event) {
+    // Attempt to get transformed coords; offsetX/Y for Chrome/Safari/IE,
+    // layerX/Y for Firefox. Touch events lack these, so compute untransformed
+    // coords.
+    // TODO: Map touch coordinates back into world-space.
+    var offsetX = 'offsetX' in event ? event.offsetX :
+          'layerX' in event ? event.layerX :
+          event.pageX - event.target.offsetLeft;
+    var offsetY = 'offsetY' in event ? event.offsetY :
+          'layerY' in event ? event.layerY :
+          event.pageY - event.target.offsetTop;
+    return { x: offsetX - SINK_OFFSET, y: offsetY - SINK_OFFSET};
   }
 
   // ======================================================================
@@ -489,11 +543,15 @@ function makeURL(base, params) {
   function log2(v) { return Math.log(v) / Math.LN2; }
   function pow2(v) { return Math.pow(2, v); }
 
-  var Map = function(container) {
+  var SINK_OFFSET = 1000;
 
-    var self = this; // For event closures that may muck with 'this'
+  function TravellerMap(container) {
+    var self = this;
 
     this.container = container;
+
+    this.width = container.offsetWidth;
+    this.height = container.offsetHeight;
 
     this.min_scale = -5;
     this.max_scale = 10;
@@ -508,7 +566,7 @@ function makeURL(base, params) {
 
     this.tilesize = 256;
 
-    this.cache = new LRUCache(128); // TODO: ensure enough to fill screen
+    this.cache = new LRUCache(64);
 
     this.loading = {};
     this.pass = 0;
@@ -518,20 +576,67 @@ function makeURL(base, params) {
     var CLICK_SCALE_DELTA = -0.5;
     var SCROLL_SCALE_DELTA = -0.15;
     var KEY_SCROLL_DELTA = 25;
-    var KEY_ZOOM_DELTA = 0.5;
 
     container.style.position = 'relative';
-    container.style.overflow = 'hidden';
 
     // Event target, so it doesn't change during refreshes
     var sink = document.createElement('div');
     sink.style.position = 'absolute';
-    sink.style.left = 0;
-    sink.style.top = 0;
-    sink.style.right = 0;
-    sink.style.bottom = 0;
+    sink.style.left = sink.style.top = sink.style.right = sink.style.bottom = (-SINK_OFFSET) + 'px';
     sink.style.zIndex = 1000;
     container.appendChild(sink);
+
+    this.canvas = null;
+    this.ctx = null;
+    var canvas = document.createElement('canvas');
+    if ('getContext' in canvas && canvas.getContext('2d')) {
+      canvas.style.position = 'absolute';
+      canvas.style.zIndex = 0;
+      container.appendChild(canvas);
+
+      var ctx = canvas.getContext('2d');
+      this.ctx = ctx;
+      this.canvas = canvas;
+
+      this.resetCanvas = function() {
+        var cw = self.width;
+        var ch = self.height;
+
+        var dpr = 'devicePixelRatio' in window ? window.devicePixelRatio : 1;
+
+        // iOS devices have a limit of 3 or 5 megapixels for canvas backing
+        // store; given screen resolution * ~3x size for "tilt" display this
+        // can easily be reached, so reduce effective dpr.
+        if (dpr > 1 && /\biPad\b/.test(navigator.userAgent) &&
+            (cw * ch * dpr * dpr * 2 * 2) > 3e6) {
+          dpr = 1;
+        }
+
+        // Scale factor for canvas to accomodate tilt.
+        var sx = 1.75;
+        var sy = 1.85;
+
+        // Pixel size of the canvas backing store.
+        var pw = (cw * sx * dpr) | 0;
+        var ph = (ch * sy * dpr) | 0;
+
+        // Offset of the canvas against the container.
+        var ox = (-((cw * sx) - cw) / 2) | 0;
+        var oy = (-((ch * sy) - ch) * 0.8) | 0;
+
+        this.canvas.width = pw;
+        this.canvas.height = ph;
+        this.canvas.style.width = ((cw * sx) | 0) + 'px';
+        this.canvas.style.height = ((ch * sy) | 0) + 'px';
+        this.canvas.offset_x = ox;
+        this.canvas.offset_y = oy;
+        this.canvas.style.left = ox + 'px';
+        this.canvas.style.top = oy + 'px';
+        this.ctx.setTransform(1,0,0,1,0,0);
+        this.ctx.scale(dpr, dpr);
+      };
+      this.resetCanvas();
+    }
 
     this.markers = [];
     this.overlays = [];
@@ -542,10 +647,9 @@ function makeURL(base, params) {
 
     function eventToHexCoords(event) {
       var f = pow2(1 - self.scale) / self.tilesize;
-      var coords = eventCoordsToLocal(event, container);
-      var rect = self.container.getBoundingClientRect();
-      var cx = self.x + f * (coords.x - rect.width / 2),
-          cy = self.y + f * (coords.y - rect.height / 2);
+      var coords = eventCoords(event);
+      var cx = self.x + f * (coords.x - self.width / 2),
+          cy = self.y + f * (coords.y - self.height / 2);
       return logicalToHex(cx * self.tilesize, cy * -self.tilesize);
     }
 
@@ -554,9 +658,9 @@ function makeURL(base, params) {
       self.cancelAnimation();
       container.focus();
       dragging = true;
-      drag_x = e.clientX;
-      drag_y = e.clientY;
-      DOMHelpers.setCapture(container);
+      var coords = eventCoords(e);
+      drag_x = coords.x;
+      drag_y = coords.y;
       container.classList.add('dragging');
 
       e.preventDefault();
@@ -566,13 +670,14 @@ function makeURL(base, params) {
     var hover_x, hover_y;
     container.addEventListener('mousemove', function(e) {
       if (dragging) {
-        var dx = drag_x - e.clientX;
-        var dy = drag_y - e.clientY;
+        var coords = eventCoords(e);
+        var dx = drag_x - coords.x;
+        var dy = drag_y - coords.y;
 
         self.offset(dx, dy);
 
-        drag_x = e.clientX;
-        drag_y = e.clientY;
+        drag_x = coords.x;
+        drag_y = coords.y;
         e.preventDefault();
         e.stopPropagation();
       }
@@ -592,7 +697,6 @@ function makeURL(base, params) {
       if (dragging) {
         dragging = false;
         container.classList.remove('dragging');
-        DOMHelpers.releaseCapture(document);
         e.preventDefault();
         e.stopPropagation();
       }
@@ -619,15 +723,14 @@ function makeURL(base, params) {
       var newscale = self.scale + CLICK_SCALE_DELTA * ((e.altKey) ? 1 : -1);
       newscale = Math.min(newscale, MAX_DOUBLECLICK_SCALE);
 
-      coords = eventCoordsToLocal(e, container);
+      coords = eventCoords(e);
       self.setScale(newscale, coords.x, coords.y);
 
       // Compute the physical coordinates
       var f = pow2(1 - self.scale) / self.tilesize,
-          coords = eventCoordsToLocal(e, container),
-          rect = self.container.getBoundingClientRect(),
-          cx = self.x + f * (coords.x - rect.width / 2),
-          cy = self.y + f * (coords.y - rect.height / 2),
+          coords = eventCoords(e),
+          cx = self.x + f * (coords.x - self.width / 2),
+          cy = self.y + f * (coords.y - self.height / 2),
           hex = logicalToHex(cx * self.tilesize, cy * -self.tilesize);
 
       fireEvent(self, 'DoubleClick', { x: hex.hx, y: hex.hy });
@@ -639,7 +742,7 @@ function makeURL(base, params) {
 
       var newscale = self.scale + SCROLL_SCALE_DELTA * ((delta > 0) ? -1 : (delta < 0) ? 1 : 0);
 
-      var coords = eventCoordsToLocal(e, container);
+      var coords = eventCoords(e);
       self.setScale(newscale, coords.x, coords.y);
 
       e.preventDefault();
@@ -649,7 +752,11 @@ function makeURL(base, params) {
     container.addEventListener('DOMMouseScroll', wheelListener); // FF
 
     window.addEventListener('resize', function() {
-      self.redraw(true); // synchronous
+      self.width = container.offsetWidth;
+      self.height = container.offsetHeight;
+      if (self.canvas)
+        self.resetCanvas();
+      self.redraw(true);
     });
 
     var pinch_x1, pinch_y1, pinch_x2, pinch_y2;
@@ -663,7 +770,7 @@ function makeURL(base, params) {
 
       if (e.touches.length === 1) {
 
-        var coords = eventCoordsToLocal(e.touches[0], container);
+        var coords = eventCoords(e.touches[0]);
         var dx = touch_x - coords.x;
         var dy = touch_y - coords.y;
 
@@ -678,8 +785,8 @@ function makeURL(base, params) {
             ocx = (pinch_x1 + pinch_x2) / 2,
             ocy = (pinch_y1 + pinch_y2) / 2;
 
-        var coords0 = eventCoordsToLocal(e.touches[0], container),
-            coords1 = eventCoordsToLocal(e.touches[1], container);
+        var coords0 = eventCoords(e.touches[0]),
+            coords1 = eventCoords(e.touches[1]);
         pinch_x1 = coords0.x;
         pinch_y1 = coords0.y;
         pinch_x2 = coords1.x;
@@ -706,7 +813,7 @@ function makeURL(base, params) {
       }
 
       if (e.touches.length === 1) {
-        var coords = eventCoordsToLocal(e.touches[0], container);
+        var coords = eventCoords(e.touches[0]);
         touch_x = coords.x;
         touch_y = coords.y;
       }
@@ -717,13 +824,13 @@ function makeURL(base, params) {
 
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
-        var coords = eventCoordsToLocal(e.touches[0], container);
+        var coords = eventCoords(e.touches[0]);
         touch_x = coords.x;
         touch_y = coords.y;
       } else if (e.touches.length === 2) {
         self.defer_loading = true;
-        var coords0 = eventCoordsToLocal(e.touches[0], container),
-            coords1 = eventCoordsToLocal(e.touches[1], container);
+        var coords0 = eventCoords(e.touches[0]),
+            coords1 = eventCoords(e.touches[1]);
         pinch_x1 = coords0.x;
         pinch_y1 = coords0.y;
         pinch_x2 = coords1.x;
@@ -758,8 +865,8 @@ function makeURL(base, params) {
         case VK_K: self.Scroll(0, KEY_SCROLL_DELTA); break;
         case VK_RIGHT:
         case VK_L: self.Scroll(KEY_SCROLL_DELTA, 0); break;
-        case VK_SUBTRACT: self.setScale(self.scale - KEY_ZOOM_DELTA); break;
-        case VK_EQUALS: self.setScale(self.scale + KEY_ZOOM_DELTA); break;
+        case VK_SUBTRACT: self.ZoomOut(); break;
+        case VK_EQUALS: self.ZoomIn(); break;
         default: return;
       }
 
@@ -771,13 +878,13 @@ function makeURL(base, params) {
 
     if (window == window.top) // == for IE
       container.focus();
-  };
+  }
 
   // ======================================================================
-  // Private Methods
+  // Internal Methods
   // ======================================================================
 
-  Map.prototype.offset = function(dx, dy) {
+  TravellerMap.prototype.offset = function(dx, dy) {
     if (dx === 0 && dy === 0)
       return;
 
@@ -789,10 +896,9 @@ function makeURL(base, params) {
     fireEvent(this, 'DisplayChanged');
   };
 
-  Map.prototype.setScale = function(newscale, px, py) {
-    var rect = this.container.getBoundingClientRect(),
-      cw = rect.width,
-      ch = rect.height;
+  TravellerMap.prototype.setScale = function(newscale, px, py) {
+    var cw = this.width,
+        ch = this.height;
 
     newscale = Math.max(Math.min(newscale, this.max_scale), this.min_scale);
     if (newscale !== this.scale) {
@@ -818,25 +924,22 @@ function makeURL(base, params) {
     }
   };
 
-  Map.prototype.invalidate = function() {
+  TravellerMap.prototype.invalidate = function() {
     this.dirty = true;
     var self = this;
     if (!self._raf_handle) {
-      self._raf_handle = requestAnimationFrame(function () {
+      self._raf_handle = requestAnimationFrame(function invalidationRAF(ms) {
         self._raf_handle = null;
         self.redraw();
       });
     }
   };
 
-  Map.prototype.redraw = function(force) {
+  TravellerMap.prototype.redraw = function(force) {
     if (!this.dirty && !force)
       return;
 
     this.dirty = false;
-
-    // *FUTURE: Spiral outwards so requests for central
-    // images are serviced first
 
     var self = this,
 
@@ -851,9 +954,8 @@ function makeURL(base, params) {
         cf = pow2(tscale - 1), // Coordinate factor (integral)
 
     // Compute edges in tile space
-        rect = this.container.getBoundingClientRect(),
-        cw = rect.width,
-        ch = rect.height,
+        cw = this.width,
+        ch = this.height,
 
         l = this.x * cf - (cw / 2) / (this.tilesize * tmult),
         r = this.x * cf + (cw / 2) / (this.tilesize * tmult),
@@ -864,12 +966,16 @@ function makeURL(base, params) {
         z = 10 + this.max_scale - this.min_scale,
         child, next;
 
-
     // Quantize to bounding tiles
     l = Math.floor(l) - 1;
     t = Math.floor(t) - 1;
     r = Math.floor(r) + 1;
     b = Math.floor(b) + 1;
+
+    // Add extra around l/t/r edges for "tilt" effect
+    l -= 1;
+    t -= 2;
+    r += 1;
 
     // Mark used tiles with this
     this.pass = (this.pass + 1) % 256;
@@ -877,32 +983,68 @@ function makeURL(base, params) {
     if (!this._rd_cb)
       this._rd_cb = function() { self.invalidate(); };
 
+    var tileCount = (r - l + 1) * (b - t + 1);
+    this.cache.ensureCapacity(tileCount * 2);
+
     // TODO: Defer loading of new tiles while in the middle of a zoom gesture
-    // Draw a rectanglular area of the map in a spiral from the center of the requested map outwards
+    // Draw a rectanglular area of the map in a spiral from the center of the requested map outward
+    if (this.ctx) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
     this.drawRectangle(l, t, r, b, tscale, tmult, ch, cw, cf, z, this._rd_cb);
 
     // Hide unused tiles
-    child = this.container.firstChild;
-    while (child) {
-      next = child.nextSibling;
-      if (child.tagName === 'IMG' && child.pass !== this.pass)
-        this.container.removeChild(child);
-      child = next;
+    if (!this.ctx) {
+      child = this.container.firstChild;
+      while (child) {
+        next = child.nextSibling;
+        if (child.tagName === 'IMG' && child.pass !== this.pass)
+          this.container.removeChild(child);
+        child = next;
+      }
     }
 
     // Reposition markers and overlays
     var i;
     for (i = 0; i < this.markers.length; i += 1)
-      this.makeMarker(this.markers[i]);
+      this.drawMarker(this.markers[i]);
 
     for (i = 0; i < this.overlays.length; i += 1)
-      this.makeOverlay(this.overlays[i]);
+      this.drawOverlay(this.overlays[i]);
+
+
+    // "Empress Wave" Overlay
+    (function() {
+      if (self.tileOptions['ew'] && self.ctx) {
+        var scale = pow2(self.scale - 1);
+        var x = -164, y = 7000, r = 6820;
+        var w = 20;
+
+        var ctx = self.ctx;
+        ctx.save();
+        ctx.translate(-self.canvas.offset_x, -self.canvas.offset_y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.3;
+        ctx.lineWidth = w * scale;
+        ctx.strokeStyle = 'yellow';
+        ctx.beginPath();
+        var pt = self.logicalToPixel(x, y);
+        ctx.arc(pt.x,
+                pt.y,
+                scale * r,
+                Math.PI/2 - Math.PI/12,
+                Math.PI/2 + Math.PI/12);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }());
   };
 
   // Draw a rectangle (x1, y1) to (x2, y2) (or,  (l,t) to (r,b))
   // Recursive. Base Cases are: single tile or vertical|horizontal line
   // Decreasingly find the next-smaller rectangle to draw, then start drawing outward from the smallest rect to draw
-  Map.prototype.drawRectangle = function(x1, y1, x2, y2, scale, mult, ch, cw, cf, zIndex, callback) {
+  TravellerMap.prototype.drawRectangle = function(x1, y1, x2, y2, scale, mult, ch, cw, cf, zIndex, callback) {
     var self = this;
 
     var sizeMult = this.tilesize * mult;
@@ -941,10 +1083,21 @@ function makeURL(base, params) {
   // are used to fill in the gap until it loads. When loaded, the callback
   // is called (which should redraw the whole map).
   //
-  Map.prototype.drawTile = function(x, y, scale, dx, dy, dw, dh, zIndex, callback) {
+  TravellerMap.prototype.drawTile = function(x, y, scale, dx, dy, dw, dh, zIndex, callback) {
     var self = this; // for closures
 
     function drawImage(img, x, y, w, h, z) {
+      if (self.ctx) {
+        x -= self.canvas.offset_x;
+        y -= self.canvas.offset_y;
+        var px = x | 0;
+        var py = y | 0;
+        var pw = ((x + w) | 0) - px;
+        var ph = ((y + h) | 0) - py;
+        self.ctx.globalCompositeOperation = 'destination-over';
+        self.ctx.drawImage(img, px, py, pw, ph);
+        return;
+      }
 
       if (img.parentNode !== self.container) self.container.appendChild(img);
 
@@ -1025,22 +1178,22 @@ function makeURL(base, params) {
   // the image is requested and the callback is called with the image
   // once it has successfully loaded.
   //
-  Map.prototype.getTile = function(x, y, scale, callback) {
+  TravellerMap.prototype.getTile = function(x, y, scale, callback) {
     if ('onLine' in navigator && !navigator.onLine)
       return undefined;
 
-    var tscale = pow2(scale - 1);
-    var options = this.options;
-    var uri = SERVICE_BASE + '/api/tile?x=' + x + '&y=' + y + '&scale=' + tscale + '&options=' + options + '&style=' + this.style;
-    Object.keys(this.tileOptions).forEach(function (key) {
-      uri += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(this.tileOptions[key]);
+    var params = {x: x, y: y, scale: pow2(scale - 1), options: this.options, style: this.style};
+    Object.keys(this.tileOptions).forEach(function(key) {
+      params[key] = this.tileOptions[key];
     }, this);
 
     if ('devicePixelRatio' in window && window.devicePixelRatio > 1)
-      uri += '&dpr=' + window.devicePixelRatio;
+      params.dpr = window.devicePixelRatio;
+
+    var url = Util.makeURL(SERVICE_BASE + '/api/tile', params);
 
     // Have it? Great, get out fast!
-    var img = this.cache.fetch(uri);
+    var img = this.cache.fetch(url);
     if (img)
       return img;
 
@@ -1049,37 +1202,36 @@ function makeURL(base, params) {
       return undefined;
 
     // In progress?
-    if (this.loading[uri])
+    if (this.loading[url])
       return undefined;
-
 
     if (this.defer_loading)
       return undefined;
 
     // Nope, better try loading it
-    this.loading[uri] = true;
+    this.loading[url] = true;
     var self = this; // for event handler closures
-    img = new Image();
+    img = document.createElement('img');
     img.onload = function() {
-      delete self.loading[uri];
-      self.cache.insert(uri, img);
+      delete self.loading[url];
+      self.cache.insert(url, img);
       callback(img);
       img.onload = null;
       img.onerror = null;
     };
     img.onerror = function() {
-      delete self.loading[uri];
+      delete self.loading[url];
       img.onload = null;
       img.onerror = null;
     };
     img.className = 'tile';
-    img.src = uri;
+    img.src = url;
     img.style.position = 'absolute';
 
     return undefined;
   };
 
-  Map.prototype.shouldAnimateToSectorHex = function(scale, sx, sy, hx, hy) {
+  TravellerMap.prototype.shouldAnimateToSectorHex = function(scale, sx, sy, hx, hy) {
     // TODO: Allow scale changes if target is "visible" (zooming in)
     if (scale !== this.scale)
       return false;
@@ -1092,14 +1244,14 @@ function makeURL(base, params) {
     return Math.sqrt(dx * dx + dy * dy) < THRESHOLD;
   };
 
-  Map.prototype.cancelAnimation = function() {
+  TravellerMap.prototype.cancelAnimation = function() {
     if (this.animation) {
       this.animation.cancel();
       this.animation = null;
     }
   };
 
-  Map.prototype.animateToSectorHex = function(scale, sx, sy, hx, hy) {
+  TravellerMap.prototype.animateToSectorHex = function(scale, sx, sy, hx, hy) {
     this.cancelAnimation();
     var target = sectorHexToLogical(sx, sy, hx, hy),
         os = this.GetScale(),
@@ -1117,8 +1269,7 @@ function makeURL(base, params) {
     var self = this;
     this.animation.onanimate = function(p) {
       // Interpolate scale in log space.
-      self.SetScale(Math.pow(2, Animation.interpolate(
-        Math.log(os)/Math.LN2, Math.log(ts)/Math.LN2, p)));
+      self.SetScale(pow2(Animation.interpolate(log2(os), log2(ts), p)));
       // TODO: If animating scale, this should follow an arc (parabola?) through 3space treating
       // scale as Z and computing a height such that the target is in view at the turnaround.
       self.SetPosition(Animation.interpolate(ox, tx, p), Animation.interpolate(oy, ty, p));
@@ -1126,75 +1277,107 @@ function makeURL(base, params) {
     };
   };
 
-  Map.prototype.makeOverlay = function(overlay) {
-    if (overlay === null)
-      return;
-
-    var div;
-    if (overlay.element && overlay.element.parentNode) {
-      overlay.element.parentNode.removeChild(overlay.element);
-      div = overlay.element;
-    } else {
-      div = document.createElement('div');
-      overlay.element = div;
-    }
-
+  TravellerMap.prototype.drawOverlay = function(overlay) {
     // Compute physical location
     var pt1 = this.logicalToPixel(overlay.x, overlay.y);
     var pt2 = this.logicalToPixel(overlay.x + overlay.w, overlay.y + overlay.h);
 
-    div.className = 'overlay';
-    div.id = overlay.id;
+    if (this.ctx) {
+      var scale = pow2(self.scale - 1);
+      var x = -164, y = 7000, r = 6820;
+      var w = 20;
+
+      var ctx = this.ctx;
+      ctx.save();
+      ctx.translate(-this.canvas.offset_x, -this.canvas.offset_y);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = styleLookup(this.style, 'overlay_color');
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(pt1.x, pt1.y, pt2.x - pt1.x, pt1.y - pt2.y);
+      ctx.restore();
+      return;
+    }
+
+    var div = overlay.element;
+    if (!div) {
+      div = overlay.element = document.createElement('div');
+      div.className = 'overlay';
+      div.id = overlay.id;
+      div.style.zIndex = overlay.z;
+    }
 
     div.style.left = String(pt1.x) + 'px';
     div.style.top = String(pt1.y) + 'px';
     div.style.width = String(pt2.x - pt1.x) + 'px';
     div.style.height = String(pt1.y - pt2.y) + 'px';
-    div.style.zIndex = overlay.z;
 
-    overlay.element = div;
-    this.container.appendChild(div);
+    if (div.parentNode !== this.container)
+      this.container.appendChild(div);
   };
 
-  Map.prototype.makeMarker = function(marker) {
-    if (marker === null)
-      return;
+  TravellerMap.prototype.drawMarker = function(marker) {
+    var self = this;
+    var pt = sectorHexToLogical(marker.sx, marker.sy, marker.hx, marker.hy);
+    pt = this.logicalToPixel(pt.x, pt.y);
 
-    var div;
-    if (marker.element && marker.element.parentNode) {
-      marker.element.parentNode.removeChild(marker.element);
-      div = marker.element;
-    } else {
-      div = document.createElement('div');
-      marker.element = div;
+    if (this.ctx && marker.url) {
+      (function() {
+        var image = stash.get(marker.url, function() { self.invalidate(); });
+        if (!image) return;
+
+        var MARKER_SIZE = 128;
+        var ctx = self.ctx;
+        ctx.save();
+        ctx.translate(-self.canvas.offset_x, -self.canvas.offset_y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(image,
+                      pt.x - MARKER_SIZE/2, pt.y - MARKER_SIZE/2,
+                      MARKER_SIZE, MARKER_SIZE);
+        ctx.restore();
+      }());
+      return;
+    }
+
+    if (this.ctx && styleLookup(self.style, marker.id + '_url')) {
+      (function() {
+       var url = styleLookup(self.style, marker.id + '_url');
+        var image = stash.get(url, function() { self.invalidate(); });
+        if (!image) return;
+
+        var ctx = self.ctx;
+        ctx.save();
+        ctx.translate(-self.canvas.offset_x, -self.canvas.offset_y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(image, pt.x, pt.y);
+        ctx.restore();
+      }());
+      return;
+    }
+
+    var div = marker.element;
+    if (!div) {
+      div = marker.element = document.createElement('div');
       if (marker.url) {
         var img = document.createElement('img');
         img.src = marker.url;
         div.appendChild(img);
       }
+      div.className = 'marker';
+      div.id = marker.id;
     }
-
-    var pt = sectorHexToLogical(marker.sx, marker.sy, marker.hx, marker.hy);
-    pt = this.logicalToPixel(pt.x, pt.y);
-
-    div.className = 'marker';
-    div.id = marker.id;
 
     div.style.left = String(pt.x) + 'px';
     div.style.top = String(pt.y) + 'px';
     div.style.zIndex = String(marker.z);
-
-    marker.element = div;
-    this.container.appendChild(div);
+    if (div.parentNode !== this.container)
+      this.container.appendChild(div);
   };
 
-  Map.prototype.logicalToPixel = function(lx, ly) {
-    var f = pow2(1 - this.scale) / this.tilesize,
-      rect = this.container.getBoundingClientRect();
-
+  TravellerMap.prototype.logicalToPixel = function(lx, ly) {
+    var f = pow2(1 - this.scale) / this.tilesize;
     return {
-      x: ((lx / this.tilesize - this.x) / f) + rect.width / 2,
-      y: ((ly / -this.tilesize - this.y) / f) + rect.height / 2
+      x: ((lx / this.tilesize - this.x) / f) + this.width / 2,
+      y: ((ly / -this.tilesize - this.y) / f) + this.height / 2
     };
   };
 
@@ -1202,32 +1385,32 @@ function makeURL(base, params) {
   // Public API
   // ======================================================================
 
-  Map.prototype.GetHexX = function() {
+  TravellerMap.prototype.GetHexX = function() {
     return logicalToHex(this.GetX(), this.GetY()).hx;
   };
 
-  Map.prototype.GetHexY = function() {
+  TravellerMap.prototype.GetHexY = function() {
     return logicalToHex(this.GetX(), this.GetY()).hy;
   };
 
-  Map.prototype.GetScale = function() {
+  TravellerMap.prototype.GetScale = function() {
     return pow2(this.scale - 1);
   };
 
-  Map.prototype.SetScale = function(scale) {
+  TravellerMap.prototype.SetScale = function(scale) {
     scale = 1 + log2(Number(scale));
     if (scale === this.scale)
       return;
     this.setScale(scale);
   };
 
-  Map.prototype.GetOptions = function() {
+  TravellerMap.prototype.GetOptions = function() {
     return this.options;
   };
 
-  Map.prototype.SetOptions = function(options) {
+  TravellerMap.prototype.SetOptions = function(options) {
     if (LEGACY_STYLES) {
-      // Handy legacy styles specified in options bits
+      // Handle legacy styles specified in options bits
       if ((options & MapOptions.StyleMaskDeprecated) === MapOptions.PrintStyleDeprecated)
         this.SetStyle('atlas');
       else if ((options & MapOptions.StyleMaskDeprecated) === MapOptions.CandyStyleDeprecated)
@@ -1244,30 +1427,30 @@ function makeURL(base, params) {
     fireEvent(this, 'OptionsChanged', this.options);
   };
 
-  Map.prototype.SetNamedOption = function(name, value) {
+  TravellerMap.prototype.SetNamedOption = function(name, value) {
     this.tileOptions[name] = value;
     this.cache.clear();
     this.invalidate();
     fireEvent(this, 'OptionsChanged', this.options);
   };
-  Map.prototype.GetNamedOption = function(name) {
+  TravellerMap.prototype.GetNamedOption = function(name) {
     return this.tileOptions[name];
   };
-  Map.prototype.ClearNamedOption = function(name) {
+  TravellerMap.prototype.ClearNamedOption = function(name) {
     delete this.tileOptions[name];
     this.cache.clear();
     this.invalidate();
     fireEvent(this, 'OptionsChanged', this.options);
   };
-  Map.prototype.GetNamedOptionNames = function() {
+  TravellerMap.prototype.GetNamedOptionNames = function() {
     return Object.keys(this.tileOptions);
   };
 
-  Map.prototype.GetStyle = function() {
+  TravellerMap.prototype.GetStyle = function() {
     return this.style;
   };
 
-  Map.prototype.SetStyle = function(style) {
+  TravellerMap.prototype.SetStyle = function(style) {
     if (style === this.style)
       return;
 
@@ -1277,15 +1460,15 @@ function makeURL(base, params) {
     this.invalidate();
   };
 
-  Map.prototype.GetX = function() {
+  TravellerMap.prototype.GetX = function() {
     return this.x * this.tilesize;
   };
 
-  Map.prototype.GetY = function() {
+  TravellerMap.prototype.GetY = function() {
     return this.y * -this.tilesize;
   };
 
-  Map.prototype.SetPosition = function(x, y) {
+  TravellerMap.prototype.SetPosition = function(x, y) {
     x /= this.tilesize;
     y /= -this.tilesize;
     if (x === this.x && y === this.y) {
@@ -1300,7 +1483,7 @@ function makeURL(base, params) {
 
   // This places the specified Sector, Hex coordinates (parsec)
   // at the center of the viewport, with a specific scale.
-  Map.prototype.ScaleCenterAtSectorHex = function(scale, sx, sy, hx, hy) {
+  TravellerMap.prototype.ScaleCenterAtSectorHex = function(scale, sx, sy, hx, hy) {
     this.cancelAnimation();
 
     if (this.shouldAnimateToSectorHex(1 + log2(Number(scale)), sx, sy, hx, hy)) {
@@ -1314,14 +1497,14 @@ function makeURL(base, params) {
 
   // This places the specified Sector, Hex coordinates (parsec)
   // at the center of the viewport
-  Map.prototype.CenterAtSectorHex = function(sx, sy, hx, hy) {
+  TravellerMap.prototype.CenterAtSectorHex = function(sx, sy, hx, hy) {
     var target = sectorHexToLogical(sx, sy, hx, hy);
     this.SetPosition(target.x, target.y);
   };
 
 
   // Scroll the map view by the specified dx/dy (in pixels)
-  Map.prototype.Scroll = function(dx, dy, fAnimate) {
+  TravellerMap.prototype.Scroll = function(dx, dy, fAnimate) {
     if (!fAnimate) {
       this.offset(dx, dy);
       return;
@@ -1347,17 +1530,21 @@ function makeURL(base, params) {
   };
 
   var ZOOM_DELTA = 0.5;
-  Map.prototype.ZoomIn = function() {
-    this.setScale(this.scale + ZOOM_DELTA);
+  function roundScale(s) {
+    return Math.round(s / ZOOM_DELTA) * ZOOM_DELTA;
+  }
+
+  TravellerMap.prototype.ZoomIn = function() {
+    this.setScale(roundScale(this.scale) + ZOOM_DELTA);
   };
 
-  Map.prototype.ZoomOut = function() {
-    this.setScale(this.scale - ZOOM_DELTA);
+  TravellerMap.prototype.ZoomOut = function() {
+    this.setScale(roundScale(this.scale) - ZOOM_DELTA);
   };
 
 
   // NOTE: This API is subject to change
-  Map.prototype.AddMarker = function(id, sx, sy, hx, hy, opt_url) {
+  TravellerMap.prototype.AddMarker = function(id, sx, sy, hx, hy, opt_url) {
     var marker = {
       sx: sx,
       sy: sy,
@@ -1366,15 +1553,15 @@ function makeURL(base, params) {
 
       id: id,
       url: opt_url,
-      z: 1009
+      z: 909
     };
 
     this.markers.push(marker);
-    this.makeMarker(marker);
+    this.invalidate();
   };
 
 
-  Map.prototype.AddOverlay = function(x, y, w, h) {
+  TravellerMap.prototype.AddOverlay = function(x, y, w, h) {
     // TODO: Take id, like AddMarker
     var overlay = {
       x: x,
@@ -1383,16 +1570,16 @@ function makeURL(base, params) {
       h: h,
 
       id: 'overlay',
-      z: 1010
+      z: 910
     };
 
     this.overlays.push(overlay);
-    this.makeOverlay(overlay);
+    this.invalidate();
   };
 
-  Map.prototype.ApplyURLParameters = function() {
+  TravellerMap.prototype.ApplyURLParameters = function() {
     var self = this;
-    var params = parseURLQuery(document.location);
+    var params = Util.parseURLQuery(document.location);
 
     function float(prop) {
       var n = parseFloat(params[prop]);
@@ -1400,7 +1587,9 @@ function makeURL(base, params) {
     }
 
     function int(prop) {
-      var n = parseInt(params[prop], 10);
+      var v = params[prop];
+      if (typeof v === 'boolean') return v ? 1 : 0;
+      var n = parseInt(v, 10);
       return isNaN(n) ? 0 : n;
     }
 
@@ -1421,30 +1610,26 @@ function makeURL(base, params) {
       this.AddMarker('you_are_here', int('yah_sx'), int('yah_sy'), int('yah_hx'), int('yah_hy'));
 
     if (has(params, ['yah_sector'])) {
-      MapService.coordinates(
-        params.yah_sector, params.yah_hex,
-        function(location) {
+      MapService.coordinates(params.yah_sector, params.yah_hex)
+        .then(function(location) {
           if (!(location.hx && location.hy)) {
             location.hx = Astrometrics.SectorWidth / 2;
             location.hy = Astrometrics.SectorHeight / 2;
           }
           self.AddMarker('you_are_here', location.sx, location.sy, location.hx, location.hy);
-        },
-        function() {
+        }, function() {
           alert('The requested marker location "' + params.yah_sector + ('yah_hex' in params ? (' ' + params.yah_hex) : '') + '" was not found.');
         });
     }
     if (has(params, ['marker_sector', 'marker_url'])) {
-      MapService.coordinates(
-        params.marker_sector, params.marker_hex,
-        function(location) {
+      MapService.coordinates(params.marker_sector, params.marker_hex)
+        .then(function(location) {
           if (!(location.hx && location.hy)) {
             location.hx = Astrometrics.SectorWidth / 2;
             location.hy = Astrometrics.SectorHeight / 2;
           }
           self.AddMarker('custom', location.sx, location.sy, location.hx, location.hy, params.marker_url);
-        },
-        function() {
+        }, function() {
           alert('The requested marker location "' + params.marker_sector + ('marker_hex' in params ? (' ' + params.marker_hex) : '') + '" was not found.');
         });
     }
@@ -1469,21 +1654,19 @@ function makeURL(base, params) {
       this.ScaleCenterAtSectorHex(
         float('scale'), float('sx'), float('sy'), float('hx'), float('hy'));
     } else if ('sector' in params) {
-      MapService.coordinates(
-        params.sector, params.hex,
-        function(location) {
+      MapService.coordinates(params.sector, params.hex)
+        .then(function(location) {
           if (location.hx && location.hy) { // NOTE: Test for undefined -or- zero
             self.ScaleCenterAtSectorHex(64, location.sx, location.sy, location.hx, location.hy);
           } else {
             self.ScaleCenterAtSectorHex(16, location.sx, location.sy, Astrometrics.SectorWidth / 2, Astrometrics.SectorHeight / 2);
           }
-        },
-        function() {
+        }, function() {
           alert('The requested location "' + params.sector + ('hex' in params ? (' ' + params.hex) : '') + '" was not found.');
         });
     }
 
-    ['silly', 'routes', 'dimunofficial'].forEach(function(name) {
+    ['silly', 'routes', 'dimunofficial', 'ew'].forEach(function(name) {
       if (name in params)
         self.tileOptions[name] = int(name);
     });
@@ -1491,12 +1674,19 @@ function makeURL(base, params) {
     return params;
   };
 
+  //----------------------------------------------------------------------
   // Exports
-  global.Traveller = Traveller;
-  global.Astrometrics = Astrometrics;
-  global.MapOptions = MapOptions;
-  global.Styles = Styles;
-  global.MapService = MapService;
-  global.Map = Map;
+  //----------------------------------------------------------------------
+
+  global.Traveller = {
+    SERVICE_BASE: SERVICE_BASE,
+    LEGACY_STYLES: LEGACY_STYLES,
+    Astrometrics: Astrometrics,
+    Map: TravellerMap,
+    MapOptions: MapOptions,
+    Styles: Styles,
+    MapService: MapService,
+    fromHex: fromHex
+  };
 
 }(this));

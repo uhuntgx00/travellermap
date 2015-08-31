@@ -2,9 +2,10 @@
 <title>Information - Traveller Map</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="../favicon.ico">
-<link rel="stylesheet" href="../site.css?update=2014-01-07">
+<link rel="stylesheet" href="../site.css?update=2015-08-04">
 <link rel="stylesheet" href="../lib/lightbox/lightbox.css">
 <meta name="viewport" content="initial-scale=1, width=device-width">
+<script src="../lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
 
 <h1>The Traveller Map</h1>
 <div class="content">
@@ -33,7 +34,7 @@
   </div>
 
   <section>
-    <h3>Official Traveller Universe</h3>
+    <h2>The Traveller Universe</h2>
     <p>
       The <dfn>Official Traveller Universe</dfn> (OTU) is the primary
       setting for various editions of the <cite>Traveller</cite> game,
@@ -57,7 +58,6 @@
       into the OTU, making use of official data approved and provided
       by FFE &mdash; as well as apocryphal and unofficial data.
     </p>
-  </section>
 
   <section>
     <h3>Official and Unofficial Data</h3>
@@ -65,11 +65,12 @@
       The status of a sector's data is called out when the sector is
       clicked or centered in the map view. <i>Official</i> data has no
       annotation - this is data supplied by FFE's Traveller 5 Second
-      Survey (T5SS) project. <i>Unreviewed</i> data was officially
-      published data for one of the many prior revisions
-      of <cite>Traveller</cite> but has not yet been completely
-      reviewed by the T5SS; it is expected that this data, with some
-      revisions, will become official soon.
+      Survey (T5SS) project. Some data is still <i>In Review</i> and
+      further refinements are expected - corrections and feedback is
+      appreciated. <i>Unreviewed</i> data was officially published
+      data for one of the many prior revisions of
+      <cite>Traveller</cite> but has not yet been reviewed by the
+      T5SS; it is expected that this data, will become official soon.
     </p>
     <p>
       In contrast, <i>Apocryphal</i> data was formerly supplied by
@@ -87,6 +88,7 @@
       secrets, lies and deliberate omissions.
     </p>
   </section>
+  </section>
 
   <section>
     <h3>Important Links</h3>
@@ -100,7 +102,7 @@
     </p>
 
     <p>
-      For details about submitting your sectors, see the <a href="submit">Submissions</a/> page.
+      For details about submitting your sectors, see the <a href="submit">Submissions</a> page.
     </p>
 
     <p>
@@ -114,51 +116,8 @@
     </p>
   </section>
 
-  <section>
-    <h3>Site History</h3>
-
-    <p>
-      This site was inspired by many sources, most prominently some of
-      the treasured posessions from my childhood:
-      the <a target="_blank"
-      href="http://travellerbibliography.org/gdw-ct/knownspace.html">
-      Imperium Map poster</a> which provided an overview of known
-      space in the <cite>Classic Traveller</cite> era; the Spinward
-      Marches poster included with
-      <a target="_blank"
-      href="http://travellerbibliography.org/gdw-ct/Deluxe.html">Deluxe
-      Traveller</a>; and the
-      <cite><a target="_blank"
-      href="http://travellerbibliography.org/gdw-ct/Atlas.html">Atlas
-      of the Imperium</a></cite>, which provided cursory maps of all
-      sectors of the Third Imperium.  In the early 1980's, using these
-      and the classic Alien Modules, I carefully pieced together a
-      <a class="lightbox" target="_blank"
-      href="../pictures/Big_Map_1.jpg">map of known space on
-      paper</a>.  I also dutifully entered the Sector Generator BASIC
-      program into my Apple II and spent endless hours trying to coax
-      a decent <a class="lightbox" target="_blank"
-      href="../pictures/DotMatrix%20Amdukan.jpg">map from a dot-matrix
-      printer</a>.
-    </p>
-    <p>
-      In early 2005, after a hiatus from <cite>Traveller</cite> of nearly 20 years,
-      I purchased a copy of the <cite><a target="_blank" href="http://www.sjgames.com/gurps/traveller/core/">
-      GURPS Traveller</a></cite> rulebook, which includes a
-      <a class="lightbox" target="_blank" href="../pictures/GURPS%20Traveller%20Map.jpg">map of charted space within the frame of an imaginary computer-based map viewer</a>. I first saw this within weeks of
-      <a target="_blank" href="http://maps.google.com">Google Maps</a>
-      appearing, and was inspired to create a functional
-      version of the map viewer using contemporary Web technologies.
-      I was also inspired by the many other online <cite>Traveller</cite> map
-      resources and desktop applications such as Jim Vassilakos' venerable
-      <a target="_blank" href="http://wiki.travellerrpg.com/Galactic">Galactic</a>.
-    </p>
-    <p>
-      Starting in 2013, this site began hosting the official data files of the
-      <i>Traveller 5 Second Survey</i> effort, as well as older published
-      data and unofficial fan submissions.
-    </p>
-  </section>
+  <section id="tips">
+    <h2>Tips and Tricks</h2>
 
   <section id="search">
     <h3>Search Tips</h3>
@@ -170,27 +129,51 @@
       subsector, among others.
     </p>
     <p>
-      You can use <code>*</code> and <code>?</code> as wildcards. <code>*</code>
-      matches zero or more characters, so <code>*ward</code> will find the Spinward Marches
-      sector. <code>?</code> matches exactly one character, so <code>t?rra</code> will
-      find the Terra system.
+      You can use <code>*</code> and <code>?</code> as
+      wildcards. <code>*</code> matches zero or more characters,
+      so <code>*ward</code> will find the Spinward Marches
+      sector. <code>?</code> matches exactly one character,
+      so <code>t?rra</code> will find the Terra system.
     </p>
     <p>
       Specify <code>uwp:</code> to search UWPs. For example,
       <code>uwp:*-g</code> will find tech level 16 worlds.
     </p>
     <p>
-      Specify <code>like:</code> to find similar-sounding words. For example,
-      <code>like:caboodle</code> will find Capital.
+      Specify <code>pbg:</code> to search PBG. For example,
+      <code>pbg:??0</code> will find systems without gas giants.
+    </p>
+    <p>
+      Specify <code>zone:</code> to search travel zones,
+      using <code>G</code> for "green" or no zone. For example,
+      <code>zone:A</code> will find Amber Zone worlds.
+    </p>
+    <p>
+      Specify <code>alleg:</code> to search allegiances. For example,
+      <code>alleg:Im*</code> will find Imperial worlds (in any domain).
+    </p>
+    <p>
+      Specify <code>in:</code> to restrict search to workds in
+      a sector. For example,
+      <code>uwp:*-f in:Deneb</code> will find tech level 15 worlds
+      in Deneb sector.
+    </p>
+    <p>
+      Specify <code>like:</code> to find similar-sounding words. For
+      example, <code>like:caboodle</code> will find Capital.
     </p>
     <p>
       Specify <code>exact:</code> to find exact matches. For example,
-      <code>exact:sol</code> will find Sol subsector, but not the Solomani Rim sector.
+      <code>exact:sol</code> will find Sol subsector, but not the
+      Solomani Rim sector. You can also surround a word or multiple
+      words in quotes like <code>"Nova Terra"</code> to require an
+      exact match.
     </p>
     <p>
-      Multiple words form an "and" search. For example, <code>sol ri</code> will
-      find the Solomani Rim sector, but not the Sol subsector. <code>c* uwp:*-f</code>
-      will find all worlds starting with C that are tech level 15.
+      Multiple words form an "and" search. For example, <code>sol
+      ri</code> will find the Solomani Rim sector, but not the Sol
+      subsector. <code>c* uwp:*-f</code> will find all worlds starting
+      with C that are tech level 15.
     </p>
   </section>
 
@@ -222,6 +205,7 @@
       <div><span class="key">+</span> - Zoom in</div>
       <div><span class="key">&minus;</span> - Zoom out</div>
       <div><span class="key">H</span> - Home (default view)</div>
+      <div><span class="key">T</span> - Toggle tilted view</div>
       <div><span class="key">I</span> or <span class="key arrow">&uarr;</span> - Scroll up (coreward)</div>
       <div><span class="key">J</span> or <span class="key arrow">&larr;</span> - Scroll left (spinward)</div>
       <div><span class="key">K</span> or <span class="key arrow">&darr;</span> - Scroll down (rimward)</div>
@@ -229,47 +213,51 @@
     </div>
 
   </section>
+  </section>
 
   <section>
-    <h3>How It Works</h3>
+    <h2>How It Works</h2>
 
     <p>
       The map page is a Web application built using HTML, CSS and
-      JavaScript.  The page uses script to request image tiles from
-      the server. As the map is moved, more tiles are fetched from the
+      JavaScript. The page uses script to request image tiles from the
+      server. As the map is moved, more tiles are fetched from the
       server, filling in the edges of the map.
     </p>
     <p>
       The server providing the map tiles is running Microsoft's IIS
-      with a custom image generation service implemented in
-      C# using ASP.NET and  GDI+
-      (via <a target="_blank" href="http://www.pdfsharp.net/">PDFsharp</a>) to render
-      the tiles.
+      with a custom image generation service implemented in C# using
+      ASP.NET and GDI+ (via <a target="_blank"
+      href="http://www.pdfsharp.net/">PDFsharp</a>) to render the
+      tiles.
     </p>
     <p>
       The full source code to the site - both client and server - is
-      available
-      on <a target="_blank" href="https://github.com/inexorabletash/travellermap">GitHub</a>
+      available on <a target="_blank"
+      href="https://github.com/inexorabletash/travellermap">GitHub</a>
       and is released under the
       <a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache open source license</a>.
     </p>
     <p>
-      The map data comes from two sources. The macro-scale data - comprising the
-      governmental borders and rifts is based on classic publications such as the
-      <a href="http://travellerbibliography.org/gdw-ct/knownspace.html" target="_blank">Imperium Map</a>
-      poster released by GDW in the early 1980s. The micro-scale data is
-      derived from sector data in <a href="fileformats">".sec" format</a>. Official
-      data from the <i>Traveller 5 Second Survey</i> effort is used where available.
+      The map data comes from two sources. The macro-scale data -
+      comprising the governmental borders and rifts is based on
+      classic publications such as the
+      <a href="http://travellerbibliography.org/gdw-ct/knownspace.html"
+      target="_blank">Imperium Map</a> poster released by GDW in the
+      early 1980s. The micro-scale data is derived from sector data
+      in <a href="fileformats">".sec" format</a>. Official data from
+      the <i>Traveller 5 Second Survey</i> effort is used where
+      available.
     </p>
-  </section>
 
   <section>
     <h3>API</h3>
 
     <p>
-        Most of the data that allows the site to function is exposed by various APIs over
-        HTTP and can be used by other sites and applications.
-        See the <a href="api">API Documentation</a> for more details.
+        Most of the data that allows the site to function is exposed
+        by various APIs over HTTP and can be used by other sites and
+        applications. See the <a href="api">API Documentation</a> for
+        more details.
     </p>
   </section>
 
@@ -277,26 +265,83 @@
     <h3>Design Notes</h3>
 
     <p>
-      The aspect ratio of the map follows the <b><i>Classic Traveller</i></b> convention
-      of hexagonal parsecs, so parsecs are cos(30&deg;):1 rather than square. This
-      means that the map on this site matches the <b><i>Classic Traveller</i></b> resources
-      such as the Imperium Map, maps in the Alien Modules, the Spinward Marches and
-      Solomani Rim modules, and hexagonal subsector maps. The maps may appear
-      distorted when compared with square-based maps such as the <cite>Atlas of the
-        Imperium</cite> or <b><i>MegaTraveller</i></b>-era publications.
+      The aspect ratio of the map follows the <b><i>Classic
+      Traveller</i></b> convention of hexagonal parsecs, so parsecs
+      are cos(30&deg;):1 rather than square. This means that the map
+      on this site matches the <b><i>Classic Traveller</i></b>
+      resources such as the Imperium Map, maps in the Alien Modules,
+      the Spinward Marches and Solomani Rim modules, and hexagonal
+      subsector maps. The maps may appear distorted when compared with
+      square-based maps such as the <cite>Atlas of the Imperium</cite>
+      or <b><i>MegaTraveller</i></b>-era publications.
     </p>
     <p>
-      When zoomed out to larger scales, the stars are rendered pseudo-randomly rather
-      than trying to display the actual system data. This maintains the appearance of
-      the Imperium Map poster. Rifts are simply left empty. At extremely large scales
-      the <a target="_blank" href="http://www.spitzer.caltech.edu/images/2353-sig05-010a-Milky-Way-Bar">structure of Milky Way galaxy</a>
-      is represented using an illustration by
-      Robert Hurt (<a target="_blank" href="http://ssc.spitzer.caltech.edu/">SSC</a>),
+      When zoomed out to larger scales, the stars are rendered
+      pseudo-randomly rather than trying to display the actual system
+      data. This maintains the appearance of the Imperium Map poster.
+      Rifts are simply left empty. At extremely large scales
+      the <a target="_blank"
+      href="http://www.spitzer.caltech.edu/images/2353-sig05-010a-Milky-Way-Bar">structure
+      of Milky Way galaxy</a> is represented using an illustration by
+      Robert Hurt (<a target="_blank"
+      href="http://ssc.spitzer.caltech.edu/">SSC</a>),
       <a target="_blank" href="http://www.jpl.nasa.gov/">JPL-Caltech</a>,
       <a target="_blank" href="http://www.nasa.gov/home/index.html">NASA</a>, circa 2005.
     </p>
 
   </section>
+  </section>
+
+  <section>
+    <h2>History and More</h2>
+
+    <p>
+      This site was inspired by many sources, most prominently some of
+      the treasured posessions from my childhood:
+      the <a target="_blank"
+      href="http://travellerbibliography.org/gdw-ct/knownspace.html">
+      Imperium Map poster</a> which provided an overview of known
+      space in the <cite>Classic Traveller</cite> era; the Spinward
+      Marches poster included with
+      <a target="_blank"
+      href="http://travellerbibliography.org/gdw-ct/Deluxe.html">Deluxe
+      Traveller</a>; and the
+      <cite><a target="_blank"
+      href="http://travellerbibliography.org/gdw-ct/Atlas.html">Atlas
+      of the Imperium</a></cite>, which provided cursory maps of all
+      sectors of the Third Imperium.  In the early 1980's, using these
+      and the classic Alien Modules, I carefully pieced together a
+      <a class="lightbox" target="_blank"
+      href="../pictures/Big_Map_1.jpg">map of known space on
+      paper</a>.  I also dutifully entered the Sector Generator BASIC
+      program into my Apple II and spent endless hours trying to coax
+      a decent <a class="lightbox" target="_blank"
+      href="../pictures/DotMatrix%20Amdukan.jpg">map from a dot-matrix
+      printer</a>.
+    </p>
+    <p>
+      In early 2005, after a hiatus from <cite>Traveller</cite> of
+      nearly 20 years, I purchased a copy of
+      the <cite><a target="_blank"
+      href="http://www.sjgames.com/gurps/traveller/core/"> GURPS
+      Traveller</a></cite> rulebook, which includes a
+      <a class="lightbox" target="_blank"
+      href="../pictures/GURPS%20Traveller%20Map.jpg">map of charted
+      space within the frame of an imaginary computer-based map
+      viewer</a>. I first saw this within weeks of
+      <a target="_blank" href="http://maps.google.com">Google Maps</a>
+      appearing, and was inspired to create a functional version of
+      the map viewer using contemporary Web technologies. I was also
+      inspired by the many other online <cite>Traveller</cite> map
+      resources and desktop applications such as Jim Vassilakos'
+      venerable
+      <a target="_blank" href="http://wiki.travellerrpg.com/Galactic">Galactic</a>.
+    </p>
+    <p>
+      Starting in 2013, this site began hosting the official data
+      files of the <i>Traveller 5 Second Survey</i> effort, as well as
+      older published data and unofficial fan submissions.
+    </p>
 
   <section id="related">
     <h3>Related Sites and Sources</h3>
@@ -341,17 +386,18 @@
     </p>
 
     <p>
-      <a target="_blank" href="http://traveller.mu.org/archive/">The Missouri Traveller Archive</a> -
-      a fabulous archive of text files.
-    </p>
-
-    <p>
       <a target="_blank" href="http://dotclue.org/t20/">Gateway to PDF</a> - an awesome set of tools by J. Greely to output
       PDF files from sector data and route/border metadata, as well as tools to compute things like borders
       from raw sector data.
     </p>
 
-    <h4>Archived Sites (via <a target="_blank" href="http://archive.org">The Internet Archive's Wayback Machine</a>)</h4>
+    <h4>Archived Sites</h4>
+    <i> (via <a target="_blank" href="http://archive.org">The Internet Archive's Wayback Machine</a>)</i>
+
+    <p>
+      <a target="_blank" href="https://web.archive.org/web/20131122115905/http://traveller.mu.org/archive/">The Missouri Traveller Archive</a> -
+      a fabulous archive of text files.
+    </p>
 
     <p>
       <a target="_blank" href="http://web.archive.org/web/20070206131226/http://maps.travellercentral.com/map.html">Map of Traveller Charted Space</a> - Anthony Jackson's awesome map site, featuring trade routes, sector data, and
@@ -360,13 +406,13 @@
 
     <p>
       <a target="_blank" href="http://web.archive.org/web/20070626165841/http://www.rossmack.com/ab/rpg/traveller/AstroIndex.asp">AB's Traveller
-        Astrography Page</a> - Andrew Brown's excellent site, featuring not only
+      Astrography Page</a> - Andrew Brown's excellent site, featuring not only
       detailed data but background theory and details on on Traveller astrometrics
       and astrography.
     </p>
 
     <p>
-      <a target="_blank" href="http://wayback.archive.org/web/20060110235423/http://www.geocities.com/traveller_core_route/">The Core Route Projects</a>
+      <a target="_blank" href="http://web.archive.org/web/20040523022859/http://www.geocities.com/traveller_core_route/">The Core Route Projects</a>
       - Clifford Linehan's extensive project to map the Zhodani Core Route.
       <em>This data is incorporated into the Traveller Map with permission.</em>
     </p>
@@ -398,12 +444,15 @@
 
     <ul>
       <li>
-        Follow the <a target="_blank" href="../?q=(grand%20tour)">Grand Tour</a>
-        route that the intrepid adventures from The Travellers' Digest took.
+        Follow the <a target="_blank"
+        href="../?q=(grand%20tour)">Grand Tour</a> route taken by the
+        intrepid adventures from The Travellers' Digest.
       </li>
       <li>
-        Follow the <a target="_blank" href="../?q=(arrival%20vengeance)">Arrival Vengeance</a>
-        - Archduke Norris' last desperate attempt to save the Third Imperium.
+        Follow the <a target="_blank"
+        href="../?q=(arrival%20vengeance)">Arrival Vengeance</a> -
+        Archduke Norris' last desperate attempt to save the Third
+        Imperium.
       </li>
       <li>
         See the locations of FASA adventures set in the
@@ -415,65 +464,71 @@
         Spinward Marches sector.
       </li>
       <li>
-        You have followed the Zhodani Core Route all the way to the core, haven't you?
+        You have followed the Zhodani Core Route all the way to the
+        core, haven't you?
       </li>
     </ul>
   </section>
+  </section>
 
   <section>
-    <h3>Copyright Information</h3>
+    <h2>Copyright Information</h2>
 
     <p>
-      The <b><i>Traveller</i></b> game in all forms is owned by <a target="_blank" href="http://www.farfuture.net">
-      Far Future Enterprises</a>. Copyright &copy; 1977 - 2014 Far Future
-      Enterprises. <b><i>Traveller</i></b> is a registered trademark of Far Future
-      Enterprises. Far Future permits web sites and fanzines for this game, provided
-      it contains this notice, that Far Future is notified, and subject to a
-      withdrawal of permission on 90 days notice. The contents of this site are for
-      personal, non-commercial use only. Any use of Far Future Enterprises's
-      copyrighted material or trademarks anywhere on this web site and its files
-      should not be viewed as a challenge to those copyrights or trademarks. In
-      addition, any program/articles/file on this site cannot be republished or
-      distributed without the consent of the author who contributed it.
+      The <b><i>Traveller</i></b> game in all forms is owned
+      by <a target="_blank" href="http://www.farfuture.net"> Far
+      Future Enterprises</a>. Copyright &copy; 1977 &ndash; 2015 Far Future
+      Enterprises. <b><i>Traveller</i></b> is a registered trademark
+      of Far Future Enterprises. Far Future permits web sites and
+      fanzines for this game, provided it contains this notice, that
+      Far Future is notified, and subject to a withdrawal of
+      permission on 90 days notice. The contents of this site are for
+      personal, non-commercial use only. Any use of Far Future
+      Enterprises's copyrighted material or trademarks anywhere on
+      this web site and its files should not be viewed as a challenge
+      to those copyrights or trademarks. In addition, any
+      program/articles/file on this site cannot be republished or
+      distributed without the consent of the author who contributed
+      it.
     </p>
     <p>
-      <b>GURPS <i>Traveller</i></b> is a registered trademark of <a target="_blank" href="http://www.sjgames.com/">
-      Steve Jackson Games</a>. All rights are reserved by Steve Jackson Games.
-      Any use of Steve Jackson Games' copyrighted material or trademarks anywhere on
-      this Web site and its files should not be viewed as a challenge to those
-      copyrights or trademarks. Any Steve Jackson Games material is used here in
-      accordance with the Steve Jackson Games <a target="_blank" href="http://www.sjgames.com/general/online_policy.html">
-      online policy</a> and notification has been given to Steve Jackson Games in
-      accordance with that policy.
+      <b>GURPS <i>Traveller</i></b> is a registered trademark
+      of <a target="_blank" href="http://www.sjgames.com/"> Steve
+      Jackson Games</a>. All rights are reserved by Steve Jackson
+      Games. Any use of Steve Jackson Games' copyrighted material or
+      trademarks anywhere on this Web site and its files should not be
+      viewed as a challenge to those copyrights or trademarks. Any
+      Steve Jackson Games material is used here in accordance with the
+      Steve Jackson Games <a target="_blank"
+      href="http://www.sjgames.com/general/online_policy.html"> online
+      policy</a> and notification has been given to Steve Jackson
+      Games in accordance with that policy.
       <br>
     </p>
     <p>
-      Materials producted by <b>Digest Group Publications</b> (DGP) are copyright &copy;
-      Roger Sanger. Any use of Digest Group Publications' copyrighted material or
-      trademarks anywhere on this Web site and its files should not be viewed as a
-      challenge to those copyrights. Usage is intended to follow the guidelines
+      Materials producted by <b>Digest Group Publications</b> (DGP)
+      are copyright &copy; Roger Sanger. Any use of Digest Group
+      Publications' copyrighted material or trademarks anywhere on
+      this Web site and its files should not be viewed as a challenge
+      to those copyrights. Usage is intended to follow the guidelines
       <a target="_blank" href="http://members.tip.net.au/~davidjw/tavspecs/maint/dgp_faq.htm">
-        announced by Roger Sanger on the Traveller Mailing List</a> for preserving
-      the overall <b><i>Traveller</i></b> milieu.
+      announced by Roger Sanger on the Traveller Mailing List</a> for
+      preserving the overall <b><i>Traveller</i></b> milieu.
     </p>
   </section>
 
 </div>
 
+<script src="../lib/lightbox/lightbox.js"></script>
+
 <!-- Google Analytics -->
 <script>
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-18610679-2']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-18610679-2', 'auto');
+  ga('send', 'pageview');
 </script>
 
-<a class="forkme" href="https://github.com/inexorabletash/travellermap"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-
-<script src="../lib/polyfill/polyfill.js"></script>
-<script src="../lib/lightbox/lightbox.js"></script>
+<script src="toc.js"></script>

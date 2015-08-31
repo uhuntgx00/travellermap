@@ -1,28 +1,35 @@
 <!DOCTYPE html>
-<title>World Data Sheet</title>
-<link rel="stylesheet" href="site.css">
+<title>World Data Sheet - Traveller Map</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="favicon.ico">
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.min.js"></script>
-<script src="lib/polyfill/polyfill.js?update=2014-06-29"></script>
-<script src="lib/polyfill/es6.js?update=2014-06-29"></script>
-<script src="world.js?update=2014-07-16"></script>
+<link rel="stylesheet" href="site.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.2/handlebars.min.js"></script>
+<script src="lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
+<script src="map.js?update=2015-08-04"></script>
+<script src="world.js?update=2015-08-15"></script>
 
 <style>
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow);
 
-body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; }
+body.nopage { margin: 0; padding: 0; overflow: hidden; }
 #paper { text-align: left; background-color: white; color: black; overflow: hidden;  }
 #page { position: relative; width: 7in; height: 9in;}
 
 @media only screen {
-  #page { margin: 0.25in;  }
+  #page { margin: 0.25in; }
 }
 
 @media only screen and (min-width: 8in) {
   body { text-align: center; background-color: gray; width: 100%; }
   #paper { width: 8in; height: 9.75in; margin: 0.25in auto; box-shadow: 0 0 30px 5px #202020;}
-  #page { margin: 0.5in;  }
+  #page { margin: 0.5in; }
+
+  .nopage #paper { width: 8in; height: 6.5in; margin: 0; }
+  .nopage #page { width: 7in; height: 5.5in; }
 }
+
+.nopage #footer { display: none; }
 
 @media only print {
   @page {
@@ -56,6 +63,20 @@ td { vertical-align: top; }
   margin: auto;
   z-index: 2;
 }
+.image .placeholder {
+  display: none;
+  color: white;
+  font-size: 60px;
+  margin-top: -30px;
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  z-index: 2;
+}
+.image.unknown .disc { display: none; }
+.image.unknown .placeholder { display: table-cell; }
+
 
 .Siz0 .disc { width: 80%; height: 45%; }
 .Siz1 .disc { width: 25%; height: 25%; }
@@ -79,14 +100,13 @@ td { vertical-align: top; }
 .decode { white-space: nowrap; margin: 10px 10px; }
 .decode tr:first-of-type td { padding-bottom: 4px; font-weight: bold;}
 .decode td {
-  padding: 0; margin: 0; width: 12px; font-size: 14px; line-height: 14px;
+  padding: 0; margin: 0; width: 16px; font-size: 14px; line-height: 14px;
   x-vertical-align: middle;
   text-align: center;
   overflow: hidden;
 }
-.decode td.box {
-  font-size: 18px; width: 16px; max-width: 16px;
-  font-family: Lucida Sans Unicode, Helvetica, Arial Unicode MS;
+.decode img {
+  margin-top: 2px;
 }
 
 .decode td:first-of-type { text-align: right; padding-right: 4px; font-size: 11px;
@@ -95,6 +115,7 @@ td { vertical-align: top; }
 
 /* Specific Data Fields */
 
+.stars { font-size: 117%; }
 .stars .star:after,
 .bases .base:after,
 .nobility .noble:after { content: ' \2014 '; } /* U+2014 EM DASH */
@@ -127,6 +148,7 @@ td { vertical-align: top; }
 <div id="world-image" class="image">
 <img class="background" alt="" src="res/Candy/tiled_nebula_256.jpg">
 <img class="disc" alt="" src="res/Candy/Hyd8.png">
+<div class="placeholder">?</div>
 </div>
 
 
@@ -134,7 +156,11 @@ td { vertical-align: top; }
 <script id="world-template" type="text/x-handlebars-template">
 
 <h1>
-{{Name}} ({{#SubsectorName}}<small>{{.}} /</small> {{/SubsectorName}}{{Sector}} {{Hex}})
+{{#if Name}} {{Name}} {{else}} (Unnamed) {{/if}}
+<small>
+{{#if SubsectorName}} / {{SubsectorName}} {{/if}}
+({{Sector}} {{Hex}})
+</small>
 </h1>
 
 {{#if AllegianceName}}
@@ -147,15 +173,17 @@ td { vertical-align: top; }
 <table class="decode"><tr>
 <td>System:
 <td>
-    <div>
-      <big class="stars"> {{#Stars}} <span class="star">{{.}}</span> {{/Stars}} </big>
+    <div class="stars">
+    {{#Stars}} <span class="star">{{.}}</span> {{/Stars}}
     </div>
     <div>
       <big>{{PBG.GG}}</big> <small>Gas Giants</small>
       &mdash;
       <big>{{PBG.Belts}}</big> <small>Planetoid Belts</small>
+      {{#if OtherWorlds}}
       &mdash;
       <big>{{OtherWorlds}}</big> <small>Other Worlds</small>
+      {{/if}}
     </div>
     <div class="bases">
       {{#Bases}} <span class="base">{{.}}</span> {{/Bases}}
@@ -166,10 +194,10 @@ td { vertical-align: top; }
 {{#UWP}}
 <table class="decode">
 <tr><td>Universal World Profile:<td>{{Starport}}<td>{{Siz}}<td>{{Atm}}<td>{{Hyd}}<td>{{Pop}}<td>{{Gov}}<td>{{Law}}<td>&ndash;<td>{{Tech}}<td>
-    <tr><td>Starport ({{StarportBlurb}})<td class="box">&#x2518;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td><td class="box">&#x2514;<td>Technology Level ({{TechBlurb}})
-<tr><td>Size ({{SizBlurb}})<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2514;<td class="box">&#x2500;<td class="box">&#x2500;<td>Law Level ({{LawBlurb}})
-<tr><td>Atmosphere ({{AtmBlurb}})<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2514;<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2500;<td>Government Type ({{GovBlurb}})
-    <tr><td>Hydrosphere ({{HydBlurb}})<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2514;<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2500;<td>Population ({{PopBlurb}})
+    <tr><td>Starport ({{StarportBlurb}})<td colspan=9 rowspan=4><img width="144" height="49" src="res/world/uwp.svg" alt=""><td>Technology Level ({{TechBlurb}})
+<tr><td>Size ({{SizBlurb}})<td>Law Level ({{LawBlurb}})
+<tr><td>Atmosphere ({{AtmBlurb}})<td>Government Type ({{GovBlurb}})
+    <tr><td>Hydrosphere ({{HydBlurb}})<td>Population ({{PopBlurb}})
 </table>
 {{/UWP}}
 
@@ -182,23 +210,25 @@ td { vertical-align: top; }
 {{#Ex}}
 <table class="decode">
 <tr><td>Economics (Ex):<td>(<td>{{Res}}<td>{{Lab}}<td>{{Inf}}<td>{{Eff}}<td>)<td>
-<tr><td>Resources<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2514;<td class="box">&#x2500;<td>Efficiency
-<tr><td>Labor<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2514;<td class="box">&#x2500;<td class="box">&#x2500;<td>Infrastructure
+<tr><td>Resources ({{ResBlurb}})<td colspan=6 rowspan=2><img width="96" height="21" src="res/world/ex.svg" alt=""><td>Efficiency ({{EffBlurb}})
+<tr><td>Labor ({{LabBlurb}})<td>Infrastructure ({{InfBlurb}})
 </table>
 {{/Ex}}
 
 {{#Cx}}
 <table class="decode">
 <tr><td>Culture [Cx]:<td>[<td>{{Hom}}<td>{{Acc}}<td>{{Str}}<td>{{Sym}}<td>]<td>
-<tr><td>Homogeneity<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2502;<td class="box">&#x2502;<td class="box">&#x2514;<td class="box">&#x2500;<td>Symbols
-<tr><td>Acceptance<td class="box">&#x2500;<td class="box">&#x2500;<td class="box">&#x2518;<td class="box">&#x2514;<td class="box">&#x2500;<td class="box">&#x2500;<td>Strangeness
+<tr><td>Homogeneity ({{HomBlurb}})<td colspan=6 rowspan=2><img width="96" height="21" src="res/world/cx.svg" alt=""><td>Symbols ({{SymBlurb}})
+<tr><td>Acceptance ({{AccBlurb}})<td>Strangeness ({{StrBlurb}})
 </table>
 {{/Cx}}
 
+{{#if TotalPopulation }}
 <table class="decode"><tr>
 <td style="vertical-align: bottom">Total Population:
 <td><big>{{PopMult}} &times; 10<sup>{{PopExp}}</sup> = {{TotalPopulation}}</big>
 </table>
+{{/if}}
 
 {{#if Nobility}}
 <table class="decode"><tr>
@@ -251,13 +281,23 @@ td { vertical-align: top; }
   </table>
 </script>
 
-<div style="text-align: center; font-size: 8pt;">
+<div id="footer" style="text-align: center; font-size: 8pt;">
   The <em class="product">Traveller</em> game in all forms is owned by Far
-  Future Enterprises. Copyright &copy; 1977 &ndash; 2014 Far Future
+  Future Enterprises. Copyright &copy; 1977 &ndash; 2015 Far Future
   Enterprises.
   <a href="http://farfuture.net/FFEFairUsePolicy2008.pdf">Fair Use Policy</a>
 </div>
 </div>
 </div>
+
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-18610679-2', 'auto');
+  ga('send', 'pageview');
+</script>
 
 </body>

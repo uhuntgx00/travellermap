@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <title>Border Generation</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="../site.css?update=2014-01-07">
+<link rel="stylesheet" href="../site.css?update=2015-07-19">
 
-<script src="../lib/polyfill/polyfill.js"></script>
+<script src="../lib/polyfill/polyfill.min.js?update=2015-07-29"></script>
 <script src="borders.js"></script>
 <script>
 var $ = function(s) { return document.querySelector(s); }
@@ -144,7 +144,7 @@ function clickHex(x, y) {
 //
 //----------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function() {
   var view = $('#map');
   makeMapDisplay(view, g_map);
 

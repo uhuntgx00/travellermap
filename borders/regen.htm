@@ -1,29 +1,27 @@
 ﻿<!DOCTYPE html>
 <title>Border Generation</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="../site.css?update=2014-01-07">
+<link rel="stylesheet" href="../site.css?update=2015-07-19">
 
-<script src="../lib/polyfill/polyfill.js"></script>
-<script src="../map.js?update=2013-12-31"></script>
+<script src="../lib/polyfill/polyfill.min.js?update=2015-07-29"></script>
+<script src="../map.js?update=2015-07-29"></script>
 <script src="borders.js"></script>
 <script>
 
 var SECTOR_WIDTH = 32, SECTOR_HEIGHT = 40;
 
 var ALLEGIANCE_COLORS = {
-  'Im': 'red',
-  'Cs': 'pink',
-  'As': 'yellow',
-  'Kk': 'green',
-  'Va': 'olive',
-  'Zh': 'blue',
-  'So': 'orange',
-  'Hv': 'purple',
-  'Fa': 'green',
-  'Da': 'lightblue',
-  'Sw': 'blue',
-  'Bw': 'cyan',
-  'Na': 'transparent'
+  'Im':   'red',
+  'As':   'yellow',
+  'Kk':   'green',
+  'Va':   'olive',
+  'ZhCo': 'blue',
+  'SoCo': 'orange',
+  'Hv':   'purple',
+  'Fa':   'green',
+  'DaCf': 'lightblue',
+  'SwCf': 'blue',
+  'Na':   'transparent',
 };
 
 function colorFor(alleg) {
@@ -31,34 +29,57 @@ function colorFor(alleg) {
   return ALLEGIANCE_COLORS[alleg];
 }
 
+// All later entries in each set are mapped to the first
 var ALLEGIANCE_SETS = [
-    ['Na', // Non-aligned
-     'Dr', // Droyne
-     '--', // Unknown
-     'Va', // Vargr
-     'va', // "
-     'Cs', // Client State
-     'Cv', // Vargr client state
-     'cv', // "
-     'J-' // Julian Protectorate
-    ],
-    /*
-    ["Im", // Classic Imperium
-     "Dd", // Rebellion: Domain of Deneb
-     "Fd", // Rebellion: Federation of Daibei
-     "Fi", // Rebellion: Federation of Ilelish
-     "La", // Rebellion: League of Antares
-     "Li", // Rebellion: Lucan's Imperium
-     "Rv", // Rebellion: Ziru Sirkaa (Restored Vilani Imperium)
-     "Ma", // Rebellion: Margaret's Stronghold
-     "St", // Rebellion: Strephon's Imperium
-     "IL", // Gateway to Destiny: Third Imperium, Luriani Cultural
-     "IU"  // Gateway to Destiny: Third Imperium, Gateway 3rd Imperium Ursa Cultural
-     ],
-     */
-    ['As', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'], // Aslan clans
-    ['Uc', 'C1', 'C2', 'C3', 'C4'] // Union Crucis (Judges Guild)
-  ];
+
+  // Non-Aligned (no borders)
+  ['Na', // Non-aligned
+   'Dr', // Droyne
+   '--', // Unknown
+   'Va', // Vargr
+   'va', // "
+   'Cs', // Client State
+   'Cv', // Vargr client state
+   'cv', // "
+   'J-', // Julian Protectorate
+
+   'NaAs', 'NaHu', 'NaVa', 'NaXX',
+   'XXXX',
+   'CsCa', 'CsHv', 'CsIm', 'CsMP', 'CsZh',
+  ],
+
+  // Classic Imperium
+  ['Im',
+   //'ImAp', // Amec Protectorate (Dagu)
+   'ImDa', // Domain of Antares (Anta/Empt/Lish)
+   'ImDc', // Domain of Sylea (Core/Delp/Forn/Mass)
+   'ImDd', // Domain of Deneb (Dene/Reft/Spin/Troj)
+   'ImDg', // Domain of Gateway (Glim/Hint/Ley)
+   'ImDi', // Domain of Ilelish (Daib/Ilel/Reav/Verg/Zaru)
+   'ImDs', // Domain of Sol (Alph/Dias/Magy/Olde/Solo)
+   'ImDv', // Domain of Vland (Corr/Dagu/Gush/Reft/Vlan)
+   //'ImLa', // League of Antares (Anta)
+   //'ImLu', // Luriani Cultural Association (Ley/Forn)
+   //'ImSy', // Sylean Worlds (Core)
+   //'ImVd' Vegan Autonomous District (Solo)
+  ],
+
+  ['As', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9',
+   'AsIf', 'AsMw', 'AsOf', 'AsSc', 'AsSF', 'AsT0', 'AsT1', 'AsT2',
+   'AsT3', 'AsT4', 'AsT5', 'AsT6', 'AsT7', 'AsT8', 'AsT9', 'AsTA',
+   'AsTv', 'AsTz', 'AsVc', 'AsWc', 'AsXX'
+  ], // Aslan clans
+
+  ['Uc', 'C1', 'C2', 'C3', 'C4'], // Union Crucis (Judges Guild)
+  ['SoCf', 'SoNS', 'SoRD', 'SoWu', 'So'], // Solomani Confederation
+  ['ZhCo', 'ZhCa', 'ZhIN', 'Zh'], // Zhodani Consulate
+
+  // Comment out to get member state borders
+  ['CA', 'CAEM', 'CAin', 'CAKT'], // Comsentient Alliance (Beyo/Vang)
+
+  //Julian Protectorate
+  ['JuPr', 'JuRu', 'JuHl']
+];
 
 
 
@@ -125,7 +146,16 @@ function updateWalks(map) {
     }
   }
 
+  borders = borders.filter(function(border) {
+    return border.path.some(function(hex) {
+      var x = (Number(hex) / 100) | 0;
+      var y = Number(hex) % 100;
+      return (1 <= x && x <= 32) && (1 <= y && y <= 40);
+    });
+  });
+
   borders.sort(function(a, b) { return a.allegiance < b.allegiance ? -1 : a.allegiance > b.allegiance ? 1 : 0; });
+
 
 
   var html = [];
@@ -133,9 +163,9 @@ function updateWalks(map) {
     if (border.path.length < 2)
       return;
 
-    var str = '<Border Allegiance="' + escapeHtml(border.allegiance) + '">' +
+    var str = '<Border Allegiance="' + Util.escapeHTML(border.allegiance) + '">' +
       border.path.join(' ') + '</Border>';
-    html.push("<li>" + escapeHtml(str));
+    html.push("<li>" + Util.escapeHTML(str));
   });
 
   document.getElementById("walks").innerHTML = html.join("");
@@ -154,8 +184,8 @@ function hexContents(x, y, map) {
 
   return "<div class='hexContents' style='background-color: " + color + ";'>" +
            "<span class='hexNumber'>" + hexNumber + "<" + "/span>" +
-	       (occupied ? "<span class='world'>" + alleg + "</span>" : "") +
-	       "<" + "/div>";
+         (occupied ? "<span class='world'>" + alleg + "</span>" : "") +
+         "<" + "/div>";
 }
 
 
@@ -191,65 +221,51 @@ function join(tasks, completion) {
 
 
 function loadSector(sx, sy, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '../api/sec?type=TabDelimited&sx=' + encodeURIComponent(sx) + '&sy=' + encodeURIComponent(sy), true);
-  xhr.onreadystatechange = function(e) {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      var worlds = [];
-      if (xhr.status === 200) {
-        var lines = xhr.responseText.split(/\r?\n/);
-        var header = lines.shift().toLowerCase().split(/\t/);
-        lines.forEach(function (line) {
-          if (!line.length)
-            return;
+  var sectorName = undefined;
+  Traveller.MapService.sectorDataTabDelimited(sectorName, {sx: sx, sy: sy})
+           .then(function(data) {
+             var worlds = [];
+             var lines = data.split(/\r?\n/);
+             var header = lines.shift().toLowerCase().split('\t');
+             lines.forEach(function (line) {
+               if (!line.length)
+                 return;
 
-          var world = {};
-          line.split(/\t/).forEach(function (field, index) {
-            world[header[index]] = field;
-          });
+               var world = {};
+               line.split('\t').forEach(function (field, index) {
+                 world[header[index]] = field;
+               });
 
-          world.x = parseInt(world.hex.substring(0, 2), 10);
-          world.y = parseInt(world.hex.substring(2, 4), 10);
-          worlds.push(world);
-        });
-      }
-      // Even on error
-      callback(worlds);
-    }
-  };
-  xhr.send();
+               world.x = parseInt(world.hex.substring(0, 2), 10);
+               world.y = parseInt(world.hex.substring(2, 4), 10);
+               worlds.push(world);
+             });
+             callback(worlds);
+           })
+           .catch(function(error) { callback([]); });
 }
 
 function sectorCoords(name, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '../api/coordinates?sector=' + encodeURIComponent(name) + "&accept=application/json", true);
-  xhr.onreadystatechange = function(e) {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      if (xhr.status === 200) {
-        callback(JSON.parse(xhr.responseText));
-      } else {
-        callback();
-      }
-    }
-  };
-  xhr.send();
+  Traveller.MapService.coordinates(name)
+           .then(callback)
+           .catch(function() { callback(); });
 }
 
 window.onload = function() {
 
   function status(message) {
     var display = document.getElementById('status');
-    display.innerHTML += '<div>' + escapeHtml(message) + '<' + '/div>';
+    display.innerHTML += '<div>' + Util.escapeHTML(message) + '<' + '/div>';
     display.scrollTop = display.scrollHeight
   }
 
-  var query = getUrlParameters();
-  if (!('sector' in query)) {
+  var searchParams = new URL(document.location).searchParams;
+  if (!searchParams.has('sector')) {
     alert("Missing sector in URL");
     return;
   }
 
-  sectorCoords(query.sector, function(coords) {
+  sectorCoords(searchParams.get('sector'), function(coords) {
     if (!coords) {
       alert("No such sector");
       return;
@@ -336,17 +352,17 @@ window.onload = function() {
   height: 15px;
   overflow: hidden;
   cursor: pointer;
-	border: solid 1px black;
-	font-size: 6pt;
-	font-family: Univers, Arial, sans-serif;
-	text-align: center;
-	line-height: 100%;
+  border: solid 1px black;
+  font-size: 6pt;
+  font-family: Univers, Arial, sans-serif;
+  text-align: center;
+  line-height: 100%;
 }
 .hexNumber
 {
-	font-size: 3pt;
-	font-family: Univers, Arial, sans-serif;
-	color: gray;
+  font-size: 3pt;
+  font-family: Univers, Arial, sans-serif;
+  color: gray;
   position: absolute;
   left: 0; top: 0;
   width: 100%;
@@ -371,7 +387,7 @@ window.onload = function() {
     overflow-y: auto;
 }
 
-	</style>
+</style>
 
 <div id="status"></div>
 <div id="map" style="position: relative;">

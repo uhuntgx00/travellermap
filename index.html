@@ -7,6 +7,7 @@
                submissions. The site also provides services for generating custom
                maps and Web APIs for incorporating maps into other sites.">
 <link rel="shortcut icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
 
 <!-- Mobile -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,51 +30,55 @@
 <meta property="og:site_name" content="The Traveller Map">
 <meta property="fb:admins" content="617166358">
 
-<link rel="stylesheet" href="index.css?update=2014-06-24">
+<link rel="stylesheet" href="index.css?update=2015-08-04">
+<link rel="stylesheet" href="lib/add-to-home-screen/addtohomescreen.css">
 
 <!--[if lt IE 8]><script>alert("IE7 is no longer supported.");location = 'http://google.com/chrome';</script><![endif]-->
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.min.js"></script>
-<script src="lib/polyfill/polyfill.js?update=2014-06-29"></script>
-<script src="map.js?update=2014-07-04"></script>
-<script src="index.js?update=2014-07-04"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.2/handlebars.min.js"></script>
+<script src="lib/polyfill/polyfill.min.js?update=2015-08-15"></script>
+<script src="map.js?update=2015-08-29"></script>
+<script src="index.js?update=2015-08-29"></script>
 <style>
 .ui {
   z-index: 2000;
+  transform: translateZ(2000px);
 }
 
 .hide-ui .ui { display: none; }
+.hide-footer #bottom-pane { display: none; }
 
 button {
   font-family: Univers, Helvetica, Arial, sans-serif;
   font-size: 10pt;
   font-weight: bold;
   padding: 0 10px; margin: 0; border: none;
+  min-width: 37px;
   background-color: #606060;
   box-shadow: 2px 2px 4px #404040;
   border-radius: 2px;
 }
 button.glyph {
-  font-size: 16pt;
+  font-size: 160%;
 }
 button img {
-  vertical-align: text-bottom;
+  vertical-align: middle;
 }
 button:hover {
   background-color: red;
+}
+::-moz-focus-inner {
+  padding: 0;
 }
 .hoverbox {
   display: none;
   position: absolute;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: black;
+  background-color: inherit;
   border: 1px solid gray;
   box-shadow: 2px 2px 4px #404040;
   padding: 20px;
 }
-.style-print .hoverbox,
-.style-atlas .hoverbox { background-color: white; }
-.style-draft .hoverbox { background-color: antiquewhite; }
 
 .hoverbox-right {
   right: 15px; top: 50px; bottom: 150px;
@@ -93,75 +98,67 @@ button:hover {
 <link rel="apple-touch-icon-precomposed" href="res/ui/regina152.png">
 <link rel="apple-touch-icon"             href="res/ui/regina152.png">
 
-<!-- http://cubiq.org/add-to-home-screen -->
-<link rel="stylesheet" href="lib/add-to-home-screen/addtohomescreen.css">
-<script type="application/javascript" src="lib/add-to-home-screen/addtohomescreen.js"></script>
-<script>
-  // Skip if in iframe
-  if (window == window.top) // == for IE
-      addToHomescreen();
-</script>
-
-<body>
-  <style>
-  html { margin: 0; padding: 0; width: 100%; height: 100%; }
-  body {
-    margin: 0; padding: 0;
-    border: none; overflow: hidden;
-    width: 100%; height: 100%; max-height: 100%;
-
-    -webkit-touch-callout: none;
-    -webkit-text-size-adjust: none;
-    -moz-text-size-adjust: none;
-  }
-  </style>
-
-  <div id="mapContainer" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;">
-    <div id="dragContainer" style="position: absolute; overflow: hidden; width: 100%; height: 100%;" tabindex="0" title="Mouse: Drag to scroll, wheel to zoom&#x0A;Keyboard: Arrows to scroll, +/- to zoom">
-      <div id="GalacticDirectionDisplay">
-        <div id="direction-coreward" class="direction">Coreward</div>
-        <div id="direction-rimward" class="direction">Rimward</div>
-        <div id="direction-spinward" class="direction">Spinward</div>
-        <div id="direction-trailing" class="direction">Trailing</div>
-
-        <style>
-        #GalacticDirectionDisplay {
-          position: absolute; width: 100%; height: 100%; z-index: 1999;
-        }
-        #GalacticDirectionDisplay .direction {
-          position: absolute; text-align: center;
-        }
-        #direction-coreward {
-          top: 4px; left: 0; right: 0;
-        }
-        #direction-rimward {
-          bottom: 4px; left: 0; right: 0;
-        }
-        #direction-spinward {
-          top: 0; bottom: 0; left: 4px;
-
-          transform: translateX(-50%) translateX(0em) rotate(270deg) translateY(50%);
-          -webkit-transform: translateX(-50%) translateX(0em) rotate(270deg) translateY(50%);
-        }
-        #direction-trailing {
-          top: 0; bottom: 0; right: 4px;
-
-          transform: translateX(50%) translateX(-1.2em) rotate(270deg) translateY(50%);
-          -webkit-transform: translateX(50%) translateX(-1.2em) rotate(270deg) translateY(50%);
-        }
-        </style>
-        <!--[if lt IE 9]>
-          <style>
-            #direction-spinward,
-            #direction-trailing {
-              -ms-writing-mode: bt-rl;
-              filter: flipv fliph; /* IE10 emulation of IE8 blocks this for untrusted sites */
-            }
-          </style>
-        <![endif]-->
-      </div>
+<body class="hide-ui hide-footer">
+  <div id="mapContainer"
+       style="position: absolute;
+              left: 0; top: 0; right: 0; bottom: 0;">
+    <div id="dragContainer"
+         style="position: absolute;
+                width: 100%; height: 100%;"
+         tabindex="0"
+         title="Mouse: Drag to scroll, wheel to zoom&#x0A;Keyboard: Arrows to scroll, +/- to zoom">
     </div>
   </div>
+  <div id="direction-coreward" class="direction">Coreward</div>
+  <div id="direction-rimward" class="direction">Rimward</div>
+  <div id="direction-spinward" class="direction">Spinward</div>
+  <div id="direction-trailing" class="direction">Trailing</div>
+
+  <style>
+  #mapContainer {
+    overflow: hidden;
+  }
+  #dragContainer {
+    transform: translateZ(500px) perspective(1000px);
+    transition: 1s ease-in-out;
+  }
+  .tilt #dragContainer {
+    -webkit-transform: translateZ(500px) perspective(1000px) rotateX(45deg);
+    transform: translateZ(500px) perspective(1000px) rotateX(45deg);
+    transition: 1s ease-in-out;
+  }
+  .direction {
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    z-index: 1000;
+  }
+  #direction-coreward {
+    top: 4px; left: 0; right: 0;
+  }
+  #direction-rimward {
+    bottom: 4px; left: 0; right: 0;
+  }
+  #direction-spinward {
+    top: 50%; left: 0.9em;
+    transform: translateY(-50%) translateX(-50%) rotate(270deg);
+    -webkit-transform: translateY(-50%) translateX(-50%) rotate(270deg);
+  }
+  #direction-trailing {
+    top: 50%; right: 0.9em;
+    transform: translateY(-50%) translateX(50%) rotate(270deg);
+    -webkit-transform: translateY(-50%) translateX(50%) rotate(270deg);
+  }
+  </style>
+  <!--[if lt IE 9]>
+      <style>
+      #direction-spinward,
+      #direction-trailing {
+        -ms-writing-mode: bt-rl;
+        filter: flipv fliph; /* IE10 emulation of IE8 blocks this for untrusted sites */
+      }
+      </style>
+  <![endif]-->
 
   <div id="searchBar" class="ui">
     <style>
@@ -174,7 +171,7 @@ button:hover {
       <input type="text"
              id="searchBox"
              placeholder="Search for..."
-             title="Search by world, subsector, or sector name.&#x0A;Use * and ? as wildcards.&#x0A;Use uwp: to search UWPs.&#x0A;Use like: for sounds-like matches.&#x0A;Use exact: to find exact matches."
+             title="Search by world, subsector, or sector name.&#x0A; &bull; * and ? as wildcards&#x0A; &bull; Use uwp: pbg: zone: or alleg: to search data (e.g. uwp:A*)&#x0A; &bull; Use in: to search in a sector (e.g. uwp:*-F in:Deneb)&#x0A; &bull; Use like: for sounds-like matches&#x0A; &bull; Use exact: or &quot;quotes&quot; to find exact matches"
              autocomplete="off"
              autocorrect="off"
              autocapitalize="off"
@@ -193,6 +190,7 @@ button:hover {
         box-shadow: 2px 2px 4px #404040;
       }
       .style-print #searchBox,
+      .style-fasa #searchBox,
       .style-draft #searchBox,
       .style-atlas #searchBox { background-color: #e0e0e0; }
       @media only screen and (max-width: 610px) {
@@ -223,8 +221,10 @@ button:hover {
       </button>
     </form>
 
-    <button id="closeResultsBtn" class="glyph">
-      &times;
+    <button id="closeResultsBtn">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAMAAAAMs7fIAAAAP1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACzJYIvAAAAFHRSTlMAPPQo5wSPcMOrDNnNZBi3h3hQSCFE0/gAAABbSURBVBjTjc1JFoAgDANQQEFlcOz9zyodeNnSTfr+InGz1xbN5zTYaBVKVJReIqHUs4rEQ4gheAcKBiCAUmVpgL5GVg8YBAjfDvJamplKFEqy0glrtz754py5H4x5BeoO3VSIAAAAAElFTkSuQmCC"
+           width="17" height="17"
+           alt="Close">
       <style>
       #closeResultsBtn {
         width: 40px; height: 30px; float: left; margin-left: 4px;
@@ -286,8 +286,11 @@ button:hover {
       max-height: 250px;
     }
     .search-results #resultsBox { display: block; }
+    #resultsBox .tip a { text-decoration: none; }
+    #resultsBox .tip a:hover { text-decoration: underline; }
     </style>
     <div id="resultsContainer"></div>
+    <p class="tip"><br><a target="_blank" href="doc/about#search">Search tips...</a></p>
     <script id="SearchResultsTemplate" type="text/x-handlebars-template">
       {{#Results.Items}}
       <div class="item">
@@ -295,6 +298,7 @@ button:hover {
           <div class="item-main"><a title="Navigate to {{Name}}" href="{{href}}" onclick="{{onclick}}">{{Name}}</a></div>
           <div class="item-location">
             {{Sector}} {{Hex}}
+            {{#InReview}}<span class="item-status">(In Review)</span>{{/InReview}}
             {{#Unreviewed}}<span class="item-status">(Unreviewed)</span>{{/Unreviewed}}
             {{#Apocryphal}}<span class="item-status">(Apocryphal)</span>{{/Apocryphal}}
             {{#Unofficial}}<span class="item-status">(Unofficial)</span>{{/Unofficial}}
@@ -306,19 +310,23 @@ button:hover {
           <div class="item-main"><a title="Navigate to {{Name}}" href="{{href}}" onclick="{{onclick}}">{{Name}}</a></div>
           <div class="item-location">
             Subsector {{Index}} of {{Sector}}
+            {{#InReview}}<span class="item-status">(In Review)</span>{{/InReview}}
             {{#Unreviewed}}<span class="item-status">(Unreviewed)</span>{{/Unreviewed}}
             {{#Apocryphal}}<span class="item-status">(Apocryphal)</span>{{/Apocryphal}}
             {{#Unofficial}}<span class="item-status">(Unofficial)</span>{{/Unofficial}}
           </div>
+          {{#Title}}<div class="item-title">{{.}}</div>{{/Title}}
           {{/Subsector}}
         {{#Sector}}
           <div class="item-main"><a title="Navigate to {{Name}}" href="{{href}}" onclick="{{onclick}}">{{Name}}</a></div>
           <div class="item-location">
             Sector
+            {{#InReview}}<span class="item-status">(In Review)</span>{{/InReview}}
             {{#Unreviewed}}<span class="item-status">(Unreviewed)</span>{{/Unreviewed}}
             {{#Apocryphal}}<span class="item-status">(Apocryphal)</span>{{/Apocryphal}}
             {{#Unofficial}}<span class="item-status">(Unofficial)</span>{{/Unofficial}}
           </div>
+          {{#Title}}<div class="item-title">{{.}}</div>{{/Title}}
         {{/Sector}}
       </div>
       {{/Results.Items}}
@@ -392,7 +400,9 @@ button:hover {
     </button>
     <button id="legendBtn"
             title="Map legend and symbols">
-      Legend
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAARCAMAAADwppwCAAAAbFBMVEUAAAAAAAADAwMAAAAAAAADAwMDAwMDAwMCAgIDAwMCAgIDAwMDAwMDAwMAAAACAgICAgIDAwMCAgIDAwMAAAAAAAADAwMDAwMDAwMCAgICAgIEBAQCAgIAAAAAAAADAwMDAwMEBAQEBAQDAwOzSkGPAAAAI3RSTlMABf4DAVD799fx4su9mQrb0K6AYicd6sS1im85LyMSwF1EQVTCPNkAAAC2SURBVBjTZY0JrsIwDETHSWjTvXRhh7/M/e/IBIEo5UmxnTdKjIT3PuALaZVg3x5o55t6WPu5KYtdvQFWybnggwG2wOO2Yy6dOf7ig0G+PNbMWG4WXPBDFhOwVbKkQk/u0WLUZ450CbqMPWq1f7T79CLJVDVXOGlHfuhU++lybcjyPB+owCJzR3n+AThqo2khI3CNfDDCDGMXty2GLjbwsFMdq2bS9Il/n3ViAbCnDyGoiNcVa+7r3Q/lRZkHawAAAABJRU5ErkJggg=="
+           width="24" height="17" style="margin: 0 -3.5px;"
+           alt="Key">
     </button>
     <button id="settingsBtn"
             title="Change the map appearance">
@@ -400,9 +410,11 @@ button:hover {
            width="17" height="17"
            alt="Settings">
     </button>
-    <button id="helpBtn" class="glyph"
+    <button id="helpBtn"
             title="Help, feedback, and more">
-      ?
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAMAAAAMs7fIAAAAS1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmYDp0AAAAGHRSTlMA1gnr374hHPM5GMOjj04UBOezq3xsXECzLbvmAAAAZklEQVQY04XNSQ6AIBAF0UZBwHm27n9S2ygRV1bSm5f8tNwNcT+8vBVdQJurBKMDyusSrWCi+A7cIw76azsRHvFRQSVQSt64QJtDoVtT59AkSG0Kg+S1UMsno3/+aqz1X7FQ/cnbCeAKBQv8hfP9AAAAAElFTkSuQmCC"
+           width="17" height="17"
+           alt="Help">
     </button>
     <script>
     window.addEventListener('DOMContentLoaded', function() {
@@ -422,31 +434,26 @@ button:hover {
         });
       });
 
-      // In FF and IE, need to render the FB "Like" button after it becomes
-      // visible or it ends up with zero height.
-      var rendered = false;
+      // Init all of the "social" UI asynchronously.
+      setTimeout(initSharingLinks, 1000);
       $('#shareBtn').addEventListener('click', function() {
-        if (!rendered) {
-          try { FB.XFBML.parse(); } catch (e) {}
-          rendered = true;
-        }
+        initSharingLinks();
       });
     });
     </script>
   </div>
 
   <style>
-  body.show-settings #settingsBox,
-  body.show-legend #legendBox,
-  body.show-share #shareBox,
-  body.show-download #downloadBox,
-  body.show-help #helpBox { display: block; }
-  body.show-settings #settingsBtn,
-  body.show-legend #legendBtn,
-  body.show-share #shareBtn,
-  body.show-download #downloadBtn,
-  body.show-help #helpBtn { background-color: red; }
-
+  .show-settings #settingsBox,
+  .show-legend #legendBox,
+  .show-share #shareBox,
+  .show-download #downloadBox,
+  .show-help #helpBox { display: block; }
+  .show-settings #settingsBtn,
+  .show-legend #legendBtn,
+  .show-share #shareBtn,
+  .show-download #downloadBtn,
+  .show-help #helpBtn { background-color: red; }
   </style>
 
   <div id="settingsBox"
@@ -469,7 +476,6 @@ button:hover {
 
     /* checkbox/radio buttons are larger on iOS */
     #settingsBox p { min-height: 24px; }
-
     </style>
     <section id="styles">
       <button id="settingsBtn-poster"
@@ -503,7 +509,7 @@ button:hover {
     <section>
       <p><strong>Show:</strong></p>
       <div class="indent">
-        <p><label title="Show or hide the direction labels around the edge of the map"><input type="checkbox" id="ShowGalacticDirections"> Galactic Direction</label></p>
+        <p><label title="Show or hide the direction labels around the edge of the map"><input type="checkbox" id="cbGalDir"> Galactic Direction</label></p>
         <p><label title="Show sector and subsector grid lines"><input type="checkbox" name="grid" value="true" id="ShowSectorGrid"> Sector Grid</label></p>
         <p><label title="Show or hide sector and subsector names"><input type="checkbox" id="ShowSectorNames"> Sector Names</label></p>
         <div class="indent">
@@ -534,6 +540,11 @@ button:hover {
         <p><label title="Remember your location for your next visit"><input type="checkbox" id="cbSaveLocation"> Location</label>
       </div>
     </section>
+
+    <!-- Hidden options, controlled by other UI elements but retained for binding. -->
+    <div style="display: none">
+      <input type="checkbox" id="cbTilt">
+    </div>
   </div>
 
   <div id="legendBox"
@@ -552,20 +563,20 @@ button:hover {
     <section id="world_colors">
       <h2>World<br>Characteristics</h2><br>
       <ul class="basic_world_colors">
-        <li><span class="glyph">&bull;</span> No Water Present
-        <li><span class="glyph water">&bull;</span> Water Present
+        <li><span class="glyph nowater">&#x25CF;</span> No Water Present
+        <li><span class="glyph water">&#x25CF;</span> Water Present
         <li><span class="glyph g12">:::</span> Asteroid Belt
         <li><span class="glyph">&#x2217;</span> Unknown
       </ul>
       <ul class="extended_world_colors">
-        <li><span class="glyph RiAg">&bull;</span> Rich &amp; Agricultural
-        <li><span class="glyph Ag">&bull;</span> Agricultural
-        <li><span class="glyph Ri">&bull;</span> Rich
-        <li><span class="glyph In">&bull;</span> Industrial
-        <li><span class="glyph corrosive">&bull;</span> Corrosive/Insidious
-        <li><span class="glyph Va">&bull;</span> Vacuum
-        <li><span class="glyph water">&bull;</span> Water Present
-        <li><span class="glyph">&bull;</span> No Water Present
+        <li><span class="glyph RiAg">&#x25CF;</span> Rich &amp; Agricultural
+        <li><span class="glyph Ag">&#x25CF;</span> Agricultural
+        <li><span class="glyph Ri">&#x25CF;</span> Rich
+        <li><span class="glyph In">&#x25CF;</span> Industrial
+        <li><span class="glyph corrosive">&#x25CF;</span> Corrosive/Insidious
+        <li><span class="glyph Va">&#x25CF;</span> Vacuum
+        <li><span class="glyph water">&#x25CF;</span> Water Present
+        <li><span class="glyph nowater">&#x25CF;</span> No Water Present
         <li><span class="glyph g12">:::</span> Asteroid Belt
       </ul>
     </section>
@@ -605,7 +616,7 @@ button:hover {
       <ul>
         <li><span class="popname">Wef</span> under 1 billion
         <li><span class="popname">YNAM</span> over 1 billion
-        <li><span class="highlight">Highlighted</span> world names<br>are subsector capitals
+        <li><span class="highlight">Highlighted</span> world names<br>are subsector capitals.
       </ul>
     </section>
   </div>
@@ -615,7 +626,7 @@ button:hover {
     <style>
     #helpBox {
       width: 200px;
-      max-height: 440px;
+      max-height: 450px;
     }
     #helpBox section { margin: 1em 0; }
     #helpBox section:first-of-type { margin-top: 0; }
@@ -637,18 +648,23 @@ button:hover {
    <section>
       <h3>Traveller</h3>
       <p><a target="_blank" href="http://farfuture.net">Far Future Enterprises</a></p>
+      <p><a target="_blank" href="http://travellerrpg.com/">Citizens of the Imperium Forum</a></p>
       <p><a target="_blank" href="http://www.mongoosepublishing.com/rpgs/traveller.html">Mongoose Publishing</a>
         &bull; <a target="_blank" href="http://forum.mongoosepublishing.com/viewforum.php?f=89">Forum</a></p>
       <p><a target="_blank" href="http://www.sjgames.com/traveller/">Steve Jackson Games</a>
         &bull; <a target="_blank" href="http://forums.sjgames.com/forumdisplay.php?f=16">Forum</a></p>
-      <p><a target="_blank" href="http://travellerrpg.com/">Citizens of the Imperium</a></p>
     </section>
 
     <section>
       <h3>The Traveller Map</h3>
       <p><a target="_blank" href="doc/about">About the Traveller Map</a></p>
       <p><a target="_blank" href="doc/credits">Credits and Data Sources</a></p>
-      <p><a target="_blank" href="http://travellermap.blogspot.com/">News, Help &amp; Feedback</a></p>
+      <p>
+        <a target="_blank" href="http://travellermap.blogspot.com/">News &amp; Feedback</a>
+        &bull;
+        <a target="_blank" href="https://trello.com/b/y61wmEKJ/travellermap-com-wish-list">Wish List</a>
+      </p>
+
     </section>
 
     <section>
@@ -656,8 +672,17 @@ button:hover {
       <p><a target="_blank" href="doc/secondsurvey">Understanding the data</a></p>
       <p><a target="_blank" href="doc/fileformats">Data file formats</a></p>
       <p>
-        <a target="_blank" href="booklet">Booklet Maker</a> &bull;
-        <a target="_blank" href="poster">Poster Maker</a>
+        <a target="_blank" href="make/booklet">Booklet Maker</a> &bull;
+        <a target="_blank" href="make/poster">Poster Maker</a>
+      </p>
+      <p>
+        <a target="_blank" href="make/borders">Border Maker</a> &bull;
+        <a target="_blank" href="make/routes">Route Maker</a>
+      </p>
+      <p>
+        <a target="_blank" href="make/path">Path Finder</a>
+        &bull;
+        <a target="_blank" href="doc/submit">Submissions</a>
       </p>
     </section>
 
@@ -665,7 +690,6 @@ button:hover {
       <h3>Developers</h3>
       <p><a target="_blank" href="doc/api">Explore the API</a></p>
       <p><a target="_blank" href="https://github.com/inexorabletash/travellermap">Get the source code</a></p>
-      <p><a target="_blank" href="https://trello.com/b/y61wmEKJ/travellermap-com-wish-list">Check the wish list</a></p>
     </section>
 
   </div>
@@ -693,11 +717,11 @@ button:hover {
     </section>
 
     <section class="fb">
-      <div class="fb-like" data-href="http://travellermap.com" data-width="200" data-colorscheme="dark" data-layout="standard" data-action="like" data-show-faces="true">Like</div>
+      <div class="fb-like" data-href="http://travellermap.com" data-width="200" data-colorscheme="dark" data-layout="standard" data-action="like" data-show-faces="false">Like</div>
     </section>
 
     <section>
-      <a target="_blank" href="http://www.tumblr.com/share" title="Share on Tumblr" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background:url('http://platform.tumblr.com/v1/share_3.png') top left no-repeat transparent;">Share on Tumblr</a>
+      <a target="_blank" href="//www.tumblr.com/share" title="Share on Tumblr" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background:url('//platform.tumblr.com/v1/share_3.png') top left no-repeat transparent;">Share on Tumblr</a>
     </section>
 
     <section>
@@ -797,18 +821,27 @@ button:hover {
       height: 30px; width: 30px;
       float: left;
       margin-left: 4px;
-      font-size: 16pt;
     }
     </style>
     <canvas id="scaleIndicator" width="120" height="30">
     </canvas>
     <button id="zoomInBtn"
             title="Zoom in&#x0A;Keyboard: +">
-      +
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARAQMAAAABo9W5AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABVJREFUCNdjgAHGA5jY/h8MY5WHAQB/vAtCMbCZpwAAAABJRU5ErkJggg=="
+             width="17" height="17"
+             alt="Zoom in">
     </button>
     <button id="zoomOutBtn"
             title="Zoom out&#x0A;Keyboard: -">
-      &minus;
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARAQMAAAABo9W5AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABBJREFUCNdjwAfs/8ExPgAAf08DuM8cN6YAAAAASUVORK5CYII="
+             width="17" height="17"
+             alt="Zoom out">
+    </button>
+    <button id="tiltBtn"
+            title="Tilt&#x0A;Keyboard: T">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARBAMAAADJQ1rJAAAAIVBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABt0UjBAAAACnRSTlMA30whC6+hgHQxOTlSpgAAAE5JREFUCNdjIACYpVZxrRIGsThXAVkrQSwmEGsRiMUBYq0AsdxArGUOKHq9QGKrQGJWYJYBkKUFZikAWVVgVgGQFQVmBQBZUmCWAFaXAABqcSAJ9vGP5gAAAABJRU5ErkJggg=="
+             width="17" height="17"
+             alt="Tilt">
     </button>
     <script>
     window.addEventListener('DOMContentLoaded', function() {
@@ -829,6 +862,7 @@ button:hover {
     #bottom-pane { background-color: rgba(0,0,0,0.65); }
     .style-draft #bottom-pane { background-color: antiquewhite; }
     .style-atlas #bottom-pane,
+    .style-fasa #bottom-pane,
     .style-print #bottom-pane { background-color: rgba(255,255,255,0.65); }
 
     #LogoImage {
@@ -839,6 +873,7 @@ button:hover {
       width: 416px; height: 71px;
       background-image: url("res/ui/logo-flat.png");
     }
+    .style-fasa #LogoImage,
     .style-draft #LogoImage,
     .style-print #LogoImage,
     .style-atlas #LogoImage {
@@ -847,26 +882,22 @@ button:hover {
 
     @media only screen and (max-width: 850px) {
       #LogoImage { width: 210px; height: 71px; background-image: url("res/ui/logo-stacked.png"); }
+      .style-fasa #LogoImage,
       .style-draft #LogoImage,
       .style-print #LogoImage,
       .style-atlas #LogoImage {  background-image: url("res/ui/logo-stacked-gray.png"); }
     }
 
     @media only screen and (max-width: 640px) {
-      #bottom-pane { zoom: 50%; }
-
-      #LogoImage { width: 416px; height: 71px; background-image: url("res/ui/logo-flat.png"); }
-      .style-draft #LogoImage,
-      .style-print #LogoImage,
-      .style-atlas #LogoImage {  background-image: url("res/ui/logo-flat-gray.png"); }
+      #bottom-pane { font-size: 75%; height: 45px; padding: 2px;}
+      #stripe { height: 2pt; margin: 2px 0px; }
+      #LogoImage { width: 105px; height: 35.5px; }
     }
 
-    @media only screen and (max-width: 480px) {
-      #LogoImage { width: 210px; height: 71px; background-image: url("res/ui/logo-stacked.png"); }
-      .style-draft #LogoImage,
-      .style-print #LogoImage,
-      .style-atlas #LogoImage {  background-image: url("res/ui/logo-stacked-gray.png"); }
+    @media only screen and (max-width: 360px) {
+      #bottom-pane { font-size: 65%; height: 60px; }
     }
+
     </style>
     <hr id="stripe">
     <div id="LogoImage" title="Traveller&reg; - Science Fiction Adventure in the Far Future">&nbsp;</div>
@@ -883,7 +914,7 @@ button:hover {
       <div style="font-style: italic;">
         The Traveller game in all forms is owned by
         <a target="_blank" href="http://farfuture.net">Far Future Enterprises</a>.
-        Copyright &copy; 1977 - 2014 Far Future Enterprises.
+        Copyright &copy; 1977 &ndash; 2015 Far Future Enterprises.
       </div>
     </div>
     <script id="SectorMetadataTemplate" type="text/x-handlebars-template">
@@ -894,7 +925,8 @@ button:hover {
     </script>
     <script id="WorldMetadataTemplate" type="text/x-handlebars-template">
       <div>
-        <a class="stealth" target="_blank" href="world?sector={{SectorName}}&hex={{WorldHex}}">
+        <a class="stealth" target="_blank" href="world?sector={{SectorName}}&hex={{WorldHex}}"
+           onclick="return showWorldPopup('world?sector={{SectorName}}&hex={{WorldHex}}&nopage&nohood');">
           {{SectorName}}
           {{WorldHex}}
           <b>{{WorldName}}</b>
@@ -910,6 +942,11 @@ button:hover {
             title="Sector data has been approved by the Traveller 5 Second Survey"
             href="doc/credits#official"><span class="bar">&#x25AC;</span> Official <span class="bar">&#x25AC;</span></a>
         {{/Official}}
+        {{#InReview}}
+          <a class="inreview" target="_blank"
+            title="Sector data is being reviewed by the Traveller 5 Second Survey"
+            href="doc/credits#inreview"><span class="bar">&#x25AC;</span> In Review <span class="bar">&#x25AC;</span></a>
+        {{/InReview}}
         {{#Unreviewed}}
           <a class="unreviewed" target="_blank"
             title="Sector data has not yet been reviewed by the Traveller 5 Second Survey"
@@ -951,47 +988,74 @@ button:hover {
 
   </div>
 
+  <div id="popup-overlay">
+    <iframe id="popup-iframe" src="about:blank"></iframe>
+    <div id="popup-click" tabindex="0"></div>
+  </div>
+
+  <div id="siteStatus" class="ui hoverbox">
+    <style>
+    #siteStatus {
+      top: 15px;
+      left: 0; right: 0;
+      margin-left: auto; margin-right: auto;
+      max-width: 400px;
+      text-align: center;
+    }
+    @media only screen and (max-width: 640px) {
+      #siteStatus {
+        max-width: 200px;
+      }
+    }
+    #siteStatus a { text-decoration: none; }
+    #siteStatus a:hover { text-decoration: underline; }
+    .show-connection-status #siteStatus { display: block; }
+    </style>
+    <a></a>
+  </div>
+
   <noscript><div>
     This site requires JavaScript.
   </div></noscript>
 
-  <!-- Twitter -->
-  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-  <!-- Google+ -->
-  <script type="text/javascript">
-  (function() {
-    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-    po.src = 'https://apis.google.com/js/plusone.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-  })();
-  </script>
-
-  <!-- Facebook -->
-  <script>
-  // Stop the fb like button from rendering automatically
-  // since the button is within {display: none} by default.
-  window.fbAsyncInit = function () { FB.init({xfbml:false}); };
-  </script>
   <div id="fb-root"></div>
-  <script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&status=0";
-  fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));</script>
+  <script>
+  var initSharingLinks = Util.once(function() {
+    // Twitter
+    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+
+    // Google+
+    (function() {
+      var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+      po.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+
+    // Facebook
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=259977877486558&version=v2.0";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  });
+  </script>
+
+  <script type="application/javascript" src="lib/add-to-home-screen/addtohomescreen.min.js"></script>
+  <script>
+    if (window == window.top && 'addToHomeScreen' in window) // Skip if in iframe, == for IE
+      addToHomescreen({skipFirstVisit: true, maxDisplayCount: 1});
+  </script>
 
   <!-- Google Analytics -->
   <script>
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-18610679-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-18610679-2', 'auto');
+    ga('send', 'pageview');
   </script>
+
 </body>

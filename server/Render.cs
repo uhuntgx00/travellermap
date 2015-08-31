@@ -37,9 +37,9 @@ namespace Maps.Rendering
         };
 
         // TODO: Move this to data file
-        private static readonly MapLabel[] megaLabels = 
+        private static readonly MapLabel[] megaLabels =
         {
-            new MapLabel("Charted Space", -120, 400, true),
+            new MapLabel("Charted Space", 0, 400, true),
             new MapLabel("Zhodani Core Expeditions", 0, -2000, true),
             new MapLabel("Core Sophonts", 0, -10000),
             new MapLabel("Abyssals", -12000, -8500),
@@ -76,6 +76,8 @@ namespace Maps.Rendering
             @"~/res/Vectors/CoreRoute.xml"
         };
 
+        private static Object s_imageInitLock = new Object();
+
         // TODO: Consider not caching these across sessions
         private static XImage s_sillyImageColor;
         private static XImage s_sillyImageGray;
@@ -84,8 +86,9 @@ namespace Maps.Rendering
 
         // These are loaded as GDI+ Images since we need to derive alpha-variants of them;
         // the results are cached as PDFSharp Images (XImage)
-        private static Image s_galaxyImage;
-        private static Image s_riftImage;
+        private static ImageHolder s_galaxyImage;
+        private static ImageHolder s_galaxyImageGray;
+        private static ImageHolder s_riftImage;
         private static Dictionary<string, XImage> s_worldImages;
 
         public class RenderContext
@@ -149,16 +152,18 @@ namespace Maps.Rendering
             using (var fonts = new FontCache(ctx.styles))
             {
                 #region resources
-                lock (ctx.resourceManager.GetType())
+                lock (s_imageInitLock)
                 {
                     if (ctx.styles.useBackgroundImage && s_backgroundImage == null)
                         s_backgroundImage = XImage.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Nebula.png"));
 
                     if (ctx.styles.showRifts && s_riftImage == null)
-                        s_riftImage = Image.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Rifts.png"));
+                        s_riftImage = new ImageHolder(Image.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Rifts.png")));
 
-                    if (ctx.styles.useGalaxyImage && s_galaxyImage == null)
-                        s_galaxyImage = Image.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Galaxy.png"));
+                    if (ctx.styles.useGalaxyImage && s_galaxyImage == null) {
+                        s_galaxyImage = new ImageHolder(Image.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Galaxy.png")));
+                        s_galaxyImageGray = new ImageHolder(Image.FromFile(ctx.resourceManager.Server.MapPath(@"~/res/Candy/Galaxy_Gray.png")));
+                    }
 
                     if (ctx.styles.useWorldImages && s_worldImages == null)
                     {
@@ -324,9 +329,10 @@ namespace Maps.Rendering
                         using (RenderUtil.SaveState(ctx.graphics))
                         {
                             ctx.graphics.MultiplyTransform(xformLinehanToMikesh);
-                            lock (s_galaxyImage)
+                            ImageHolder galaxyImage = ctx.styles.lightBackground ? s_galaxyImageGray : s_galaxyImage;
+                            lock (galaxyImage)
                             {
-                                RenderUtil.DrawImageAlpha(ctx.graphics, ctx.styles.deepBackgroundOpacity, s_galaxyImage, galaxyImageRect);
+                                RenderUtil.DrawImageAlpha(ctx.graphics, ctx.styles.deepBackgroundOpacity, galaxyImage, galaxyImageRect);
                             }
                         }
                     }
@@ -526,9 +532,9 @@ namespace Maps.Rendering
 
                         ctx.styles.parsecGrid.pen.Apply(ref pen);
 
-                        switch (ctx.styles.microBorderStyle)
+                        switch (ctx.styles.hexStyle)
                         {
-                            case MicroBorderStyle.Square:
+                            case HexStyle.Square:
                                 for (int px = hx - parsecSlop; px < hx + hw + parsecSlop; px++)
                                 {
                                     float yOffset = ((px % 2) != 0) ? 0.0f : 0.5f;
@@ -541,7 +547,7 @@ namespace Maps.Rendering
                                 }
                                 break;
 
-                            case MicroBorderStyle.Hex:
+                            case HexStyle.Hex:
                                 XPoint[] points = new XPoint[4];
                                 for (int px = hx - parsecSlop; px < hx + hw + parsecSlop; px++)
                                 {
@@ -556,7 +562,7 @@ namespace Maps.Rendering
                                     }
                                 }
                                 break;
-                            case MicroBorderStyle.Curve:
+                            case HexStyle.None:
                                 // none
                                 break;
                         }
@@ -628,8 +634,8 @@ namespace Maps.Rendering
                     if (ctx.styles.microBorders.visible)
                     {
                         if (ctx.styles.fillMicroBorders)
-                            DrawMicroBorders(ctx, fonts, BorderLayer.Fill);
-                        DrawMicroBorders(ctx, fonts, BorderLayer.Stroke);
+                            DrawMicroBorders(ctx, BorderLayer.Fill);
+                        DrawMicroBorders(ctx, BorderLayer.Stroke);
                     }
                     #endregion
                     timers.Add(new Timer("micro-borders"));
@@ -830,7 +836,8 @@ namespace Maps.Rendering
                 if (ctx.styles.dimUnofficialSectors && ctx.styles.worlds.visible)
                 {
                     solidBrush.Color = Color.FromArgb(128, ctx.styles.backgroundColor);
-                    foreach (Sector sector in ctx.selector.Sectors.Where(sector => !sector.Tags.Contains("Official")))
+                    foreach (Sector sector in ctx.selector.Sectors
+                        .Where(sector => !sector.Tags.Contains("Official") && !sector.Tags.Contains("Preserve") && !sector.Tags.Contains("InReview")))
                         ctx.graphics.DrawRectangle(solidBrush, sector.Bounds);
                 }
 
@@ -896,24 +903,33 @@ namespace Maps.Rendering
                         #region Zone
                         if (ctx.styles.worldDetails.HasFlag(WorldDetails.Zone))
                         {
-                            if (world.IsAmber || world.IsRed || world.IsBlue)
+                            Stylesheet.StyleElement? maybeElem = ZoneStyle(ctx, world);
+                            if (maybeElem.HasValue)
                             {
-                                PenInfo pi =
-                                    world.IsAmber ? ctx.styles.amberZone.pen :
-                                    world.IsRed ? ctx.styles.redZone.pen : ctx.styles.blueZone.pen;
-                                pi.Apply(ref pen);
-
-                                if (renderName && ctx.styles.fillMicroBorders)
+                                Stylesheet.StyleElement elem = maybeElem.Value;
+                                if (!elem.fillColor.IsEmpty)
                                 {
-                                    using (RenderUtil.SaveState(ctx.graphics))
+                                    solidBrush.Color = elem.fillColor;
+                                    ctx.graphics.DrawEllipse(solidBrush, -0.4f, -0.4f, 0.8f, 0.8f);
+                                }
+
+                                PenInfo pi = elem.pen;
+                                if (!pi.color.IsEmpty)
+                                {
+                                    pi.Apply(ref pen);
+
+                                    if (renderName && ctx.styles.fillMicroBorders)
                                     {
-                                        ctx.graphics.IntersectClip(new RectangleF(-.5f, -.5f, 1f, renderUWP ? 0.65f : 0.75f));
+                                        using (RenderUtil.SaveState(ctx.graphics))
+                                        {
+                                            ctx.graphics.IntersectClip(new RectangleF(-.5f, -.5f, 1f, renderUWP ? 0.65f : 0.75f));
+                                            ctx.graphics.DrawEllipse(pen, -0.4f, -0.4f, 0.8f, 0.8f);
+                                        }
+                                    }
+                                    else
+                                    {
                                         ctx.graphics.DrawEllipse(pen, -0.4f, -0.4f, 0.8f, 0.8f);
                                     }
-                                }
-                                else
-                                {
-                                    ctx.graphics.DrawEllipse(pen, -0.4f, -0.4f, 0.8f, 0.8f);
                                 }
                             }
                         }
@@ -938,6 +954,148 @@ namespace Maps.Rendering
 
                     if (layer == WorldLayer.Foreground)
                     {
+                        Stylesheet.StyleElement? elem = ZoneStyle(ctx, world);
+                        TextBackgroundStyle worldTextBackgroundStyle = (elem.HasValue && !elem.Value.fillColor.IsEmpty)
+                            ? TextBackgroundStyle.None : ctx.styles.worlds.textBackgroundStyle;
+
+                        #region Name
+                        if (renderName)
+                        {
+                            string name = world.Name;
+                            if ((isHiPop && ctx.styles.worldDetails.HasFlag(WorldDetails.Highlight)) || ctx.styles.worlds.textStyle.Uppercase)
+                                name = name.ToUpperInvariant();
+
+                            Color textColor = (isCapital && ctx.styles.worldDetails.HasFlag(WorldDetails.Highlight))
+                                ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                            XFont font = ((isHiPop || isCapital) && ctx.styles.worldDetails.HasFlag(WorldDetails.Highlight))
+                                ? ctx.styles.worlds.LargeFont : ctx.styles.worlds.Font;
+
+                            DrawWorldLabel(ctx, worldTextBackgroundStyle, solidBrush, textColor, ctx.styles.worlds.textStyle.Translation, font, name);
+                        }
+                        #endregion
+
+                        #region Allegiance
+                        // TODO: Mask off background for allegiance
+                        if (ctx.styles.worldDetails.HasFlag(WorldDetails.Allegiance))
+                        {
+                            string alleg = world.Allegiance;
+                            if (!SecondSurvey.IsDefaultAllegiance(alleg))
+                            {
+                                if (!ctx.styles.t5AllegianceCodes && alleg.Length > 2)
+                                    alleg = SecondSurvey.T5AllegianceCodeToLegacyCode(alleg);
+
+                                solidBrush.Color = ctx.styles.worlds.textColor;
+
+                                if (ctx.styles.lowerCaseAllegiance)
+                                    alleg = alleg.ToLowerInvariant();
+
+                                ctx.graphics.DrawString(alleg, ctx.styles.worlds.SmallFont, solidBrush, ctx.styles.AllegiancePosition.X, ctx.styles.AllegiancePosition.Y, RenderUtil.StringFormatCentered);
+                            }
+                        }
+                        #endregion
+
+                        if (!isPlaceholder)
+                        {
+                            #region GasGiant
+                            if (ctx.styles.worldDetails.HasFlag(WorldDetails.GasGiant))
+                            {
+                                if (world.GasGiants > 0)
+                                {
+                                    solidBrush.Color = ctx.styles.worlds.textColor;
+                                    RenderUtil.DrawGlyph(ctx.graphics, Glyph.Circle, styleRes, solidBrush, ctx.styles.GasGiantPosition.X, ctx.styles.GasGiantPosition.Y);
+                                }
+                            }
+                            #endregion
+
+                            #region Starport
+                            if (ctx.styles.worldDetails.HasFlag(WorldDetails.Starport))
+                            {
+                                string starport = world.Starport.ToString();
+                                DrawWorldLabel(ctx, worldTextBackgroundStyle, solidBrush, ctx.styles.worlds.textColor, ctx.styles.StarportPosition, styleRes.StarportFont, starport);
+                            }
+                            #endregion
+
+                            #region UWP
+                            if (renderUWP)
+                            {
+                                string uwp = world.UWP;
+                                solidBrush.Color = ctx.styles.worlds.textColor;
+
+                                ctx.graphics.DrawString(uwp, ctx.styles.hexNumber.Font, solidBrush, ctx.styles.StarportPosition.X, -ctx.styles.StarportPosition.Y, RenderUtil.StringFormatCentered);
+                            }
+                            #endregion
+
+                            #region Bases
+                            // TODO: Mask off background for glyphs
+                            if (ctx.styles.worldDetails.HasFlag(WorldDetails.Bases))
+                            {
+                                string bases = world.Bases;
+
+                                // Special case: Show Zho Naval+Military as diamond
+                                if (world.BaseAllegiance == "Zh" && bases == "KM")
+                                    bases = "Z";
+
+                                // Base 1
+                                bool bottomUsed = false;
+                                if (bases.Length > 0)
+                                {
+                                    Glyph glyph = Glyph.FromBaseCode(world.BaseAllegiance, bases[0]);
+                                    if (glyph.Printable)
+                                    {
+                                        PointF pt = ctx.styles.BaseTopPosition;
+                                        if (glyph.Bias == Glyph.GlyphBias.Bottom)
+                                        {
+                                            pt = ctx.styles.BaseBottomPosition;
+                                            bottomUsed = true;
+                                        }
+
+                                        solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                        RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, pt.X, pt.Y);
+                                    }
+                                }
+
+                                // Base 2
+                                if (bases.Length > 1)
+                                {
+                                    Glyph glyph = Glyph.FromBaseCode(world.LegacyAllegiance, bases[1]);
+                                    if (glyph.Printable)
+                                    {
+                                        PointF pt = bottomUsed ? ctx.styles.BaseTopPosition : ctx.styles.BaseBottomPosition;
+                                        solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                        RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, pt.X, pt.Y);
+                                    }
+                                }
+
+                                // Research Stations
+                                string rs;
+                                if ((rs = world.ResearchStation) != null)
+                                {
+                                    Glyph glyph = Glyph.FromResearchCode(rs);
+                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, ctx.styles.BaseMiddlePosition.Y);
+                                }
+                                else if (world.IsReserve)
+                                {
+                                    Glyph glyph = Glyph.Reserve;
+                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
+                                }
+                                else if (world.IsPenalColony)
+                                {
+                                    Glyph glyph = Glyph.Prison;
+                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
+                                }
+                                else if (world.IsPrisonExileCamp)
+                                {
+                                    Glyph glyph = Glyph.ExileCamp;
+                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
+                                }
+                            }
+                            #endregion
+                        }
+
                         #region Disc
                         if (ctx.styles.worldDetails.HasFlag(WorldDetails.Type))
                         {
@@ -947,13 +1105,6 @@ namespace Maps.Rendering
                             }
                             else
                             {
-                                // Blank out world area, so routes are shown correctly
-                                if (!ctx.styles.fillMicroBorders)
-                                {
-                                    solidBrush.Color = ctx.styles.backgroundColor;
-                                    ctx.graphics.DrawEllipse(solidBrush, -0.15f, -0.15f, 0.3f, 0.3f);
-                                }
-
                                 if (world.Size <= 0)
                                 {
                                     #region Asteroid-Belt
@@ -1025,145 +1176,9 @@ namespace Maps.Rendering
                             ctx.graphics.DrawEllipse(solidBrush, -0.2f, -0.2f, 0.4f, 0.4f);
                         }
                         #endregion
-
-                        #region Name
-                        if (renderName)
-                        {
-                            string name = world.Name;
-                            if (isHiPop || ctx.styles.worlds.textStyle.Uppercase)
-                                name = name.ToUpperInvariant();
-
-                            Color textColor = isCapital ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                            XFont font = (isHiPop || isCapital) ? ctx.styles.worlds.LargeFont : ctx.styles.worlds.Font;
-
-                            DrawWorldLabel(ctx, ctx.styles.worlds.textBackgroundStyle, solidBrush, textColor, ctx.styles.worlds.textStyle.Translation, font, name);
-                        }
-                        #endregion
-
-                        #region Allegiance
-                        // TODO: Mask off background for allegiance
-                        if (ctx.styles.worldDetails.HasFlag(WorldDetails.Allegiance))
-                        {
-                            string alleg = world.Allegiance;
-                            if (!SecondSurvey.IsDefaultAllegiance(alleg))
-                            {
-                                if (!ctx.styles.t5AllegianceCodes && alleg.Length > 2)
-                                    alleg = SecondSurvey.T5AllegianceCodeToLegacyCode(alleg);
-
-                                solidBrush.Color = ctx.styles.worlds.textColor;
-
-                                if (ctx.styles.lowerCaseAllegiance)
-                                    alleg = alleg.ToLowerInvariant();
-
-                                ctx.graphics.DrawString(alleg, ctx.styles.worlds.SmallFont, solidBrush, ctx.styles.AllegiancePosition.X, ctx.styles.AllegiancePosition.Y, RenderUtil.StringFormatCentered);
-                            }
-                        }
-                        #endregion
-
-                        if (isPlaceholder)
-                            return;
-
-                        #region GasGiant
-                        if (ctx.styles.worldDetails.HasFlag(WorldDetails.GasGiant))
-                        {
-                            if (world.GasGiants > 0)
-                            {
-                                solidBrush.Color = ctx.styles.worlds.textColor;
-                                RenderUtil.DrawGlyph(ctx.graphics, Glyph.Circle, styleRes, solidBrush, ctx.styles.GasGiantPosition.X, ctx.styles.GasGiantPosition.Y);
-                            }
-                        }
-                        #endregion
-
-                        #region Starport
-                        if (ctx.styles.worldDetails.HasFlag(WorldDetails.Starport))
-                        {
-                            string starport = world.Starport.ToString();
-                            DrawWorldLabel(ctx, ctx.styles.worlds.textBackgroundStyle, solidBrush, ctx.styles.worlds.textColor, ctx.styles.StarportPosition, styleRes.StarportFont, starport);
-                        }
-                        #endregion
-
-                        #region UWP
-                        if (renderUWP)
-                        {
-                            string uwp = world.UWP;
-                            solidBrush.Color = ctx.styles.worlds.textColor;
-
-                            ctx.graphics.DrawString(uwp, ctx.styles.hexNumber.Font, solidBrush, ctx.styles.StarportPosition.X, -ctx.styles.StarportPosition.Y, RenderUtil.StringFormatCentered);
-                        }
-                        #endregion
-
-                        #region Bases
-                        // TODO: Mask off background for glyphs
-                        if (ctx.styles.worldDetails.HasFlag(WorldDetails.Bases))
-                        {
-                            string bases = world.Bases;
-
-                            // Special case: Show Zho Naval+Military as diamond
-                            if (world.BaseAllegiance == "Zh" && bases == "KM")
-                                bases = "Z";
-
-                            // Base 1
-                            bool bottomUsed = false;
-                            if (bases.Length > 0)
-                            {
-                                Glyph glyph = Glyph.FromBaseCode(world.BaseAllegiance, bases[0]);
-                                if (glyph.Printable)
-                                {
-                                    PointF pt = ctx.styles.BaseTopPosition;
-                                    if (glyph.Bias == Glyph.GlyphBias.Bottom)
-                                    {
-                                        pt = ctx.styles.BaseBottomPosition;
-                                        bottomUsed = true;
-                                    }
-
-                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, pt.X, pt.Y);
-                                }
-                            }
-
-                            // Base 2
-                            if (bases.Length > 1)
-                            {
-                                Glyph glyph = Glyph.FromBaseCode(world.LegacyAllegiance, bases[1]);
-                                if (glyph.Printable)
-                                {
-                                    PointF pt = bottomUsed ? ctx.styles.BaseTopPosition : ctx.styles.BaseBottomPosition;
-                                    solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                    RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, pt.X, pt.Y);
-                                }
-                            }
-
-                            // Research Stations
-                            string rs;
-                            if ((rs = world.ResearchStation) != null)
-                            {
-                                Glyph glyph = Glyph.FromResearchCode(rs);
-                                solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, ctx.styles.BaseMiddlePosition.Y);
-                            }
-                            else if (world.IsReserve)
-                            {
-                                Glyph glyph = Glyph.Reserve;
-                                solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
-                            }
-                            else if (world.IsPenalColony)
-                            {
-                                Glyph glyph = Glyph.Prison;
-                                solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
-                            }
-                            else if (world.IsPrisonExileCamp)
-                            {
-                                Glyph glyph = Glyph.ExileCamp;
-                                solidBrush.Color = glyph.IsHighlighted ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
-                                RenderUtil.DrawGlyph(ctx.graphics, glyph, styleRes, solidBrush, ctx.styles.BaseMiddlePosition.X, 0);
-                            }
-                        }
-                        #endregion
                     }
                 }
-                else
+                else // ctx.styles.useWorldImages
                 {
                     float imageRadius = ((world.Size <= 0) ? 0.6f : (0.3f * (world.Size / 5.0f + 0.2f))) / 2;
                     float decorationRadius = imageRadius;
@@ -1288,7 +1303,8 @@ namespace Maps.Rendering
 
                             using (RenderUtil.SaveState(ctx.graphics))
                             {
-                                Color textColor = isCapital ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
+                                Color textColor = (isCapital && ctx.styles.worldDetails.HasFlag(WorldDetails.Highlight))
+                                    ? ctx.styles.worlds.textHighlightColor : ctx.styles.worlds.textColor;
 
                                 if (ctx.styles.worlds.textStyle.Uppercase)
                                     name = name.ToUpper();
@@ -1307,6 +1323,18 @@ namespace Maps.Rendering
                     }
                 }
             }
+        }
+
+        private static Stylesheet.StyleElement? ZoneStyle(RenderContext ctx, World world)
+        {
+            if (world.IsAmber || world.IsRed || world.IsBlue)
+            {
+                Stylesheet.StyleElement elem =
+                    world.IsAmber ? ctx.styles.amberZone :
+                    world.IsRed ? ctx.styles.redZone : ctx.styles.blueZone;
+                return elem;
+            }
+            return null;
         }
 
         private static void DrawWorldLabel(RenderContext ctx, TextBackgroundStyle backgroundStyle, XSolidBrush brush, Color color, PointF position, XFont font, string text)
@@ -1391,7 +1419,6 @@ namespace Maps.Rendering
                             System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(@"\s+(?![a-z])");
                             if (border.WrapLabel)
                                 text = r.Replace(text, "\n");
-                                //text = text.Replace(' ', '\n');
 
                             RenderUtil.DrawLabel(ctx.graphics, text, labelPos, ctx.styles.microBorders.Font, solidBrush, ctx.styles.microBorders.textStyle);
                         }
@@ -1459,9 +1486,12 @@ namespace Maps.Rendering
                             endPoint = tmp;
                         }
 
+                        // Shorten line to leave room for world glyph
+                        OffsetSegment(ref startPoint, ref endPoint, 0.25f);
+
                         float? routeWidth = route.Width;
                         Color? routeColor = route.Color;
-                        LineStyle? routeStyle = route.Style;
+                        LineStyle? routeStyle = ctx.styles.overrideLineStyle ?? route.Style;
 
                         SectorStylesheet.StyleResult ssr = sector.ApplyStylesheet("route", route.Allegiance ?? route.Type ?? "Im");
                         routeStyle = routeStyle ?? ssr.GetEnum<LineStyle>("style");
@@ -1479,6 +1509,9 @@ namespace Maps.Rendering
                         if (ctx.styles.grayscale || !ColorUtil.NoticeableDifference(routeColor.Value, ctx.styles.backgroundColor))
                             routeColor = ctx.styles.microRoutes.pen.color; // default
 
+                        if (routeStyle.Value == LineStyle.None)
+                            continue;
+
                         pen.Color = routeColor.Value;
                         pen.Width = routeWidth.Value * baseWidth;
                         pen.DashStyle = LineStyleToDashStyle(routeStyle.Value);
@@ -1489,6 +1522,19 @@ namespace Maps.Rendering
             }
         }
 
+        private static void OffsetSegment(ref PointF startPoint, ref PointF endPoint, float offset)
+        {
+            float dx = endPoint.X - startPoint.X;
+            float dy = endPoint.Y - startPoint.Y;
+            float length = (float)Math.Sqrt(dx * dx + dy * dy);
+            float ddx = dx * offset / length;
+            float ddy = dy * offset / length;
+            startPoint.X += ddx;
+            startPoint.Y += ddy;
+            endPoint.X -= ddx;
+            endPoint.Y -= ddy;
+        }
+
         private static XDashStyle LineStyleToDashStyle(LineStyle style)
         {
             switch (style)
@@ -1497,11 +1543,12 @@ namespace Maps.Rendering
                 case LineStyle.Solid: return XDashStyle.Solid;
                 case LineStyle.Dashed: return XDashStyle.Dash;
                 case LineStyle.Dotted: return XDashStyle.Dot;
+                case LineStyle.None: throw new ApplicationException("LineStyle.None should be detected earlier");
             }
         }
 
         private enum BorderLayer { Fill, Stroke };
-        private static void DrawMicroBorders(RenderContext ctx, FontCache styleRes, BorderLayer layer)
+        private static void DrawMicroBorders(RenderContext ctx, BorderLayer layer)
         {
             const byte FILL_ALPHA = 64;
 
@@ -1549,11 +1596,15 @@ namespace Maps.Rendering
                         borderStyle = borderStyle ?? ssr.GetEnum<LineStyle>("style") ?? LineStyle.Solid;
                         borderColor = borderColor ?? ssr.GetColor("color") ?? ctx.styles.microBorders.pen.color;
 
+                        if (layer == BorderLayer.Stroke && borderStyle.Value == LineStyle.None)
+                            continue;
+
                         if (ctx.styles.grayscale ||
                             !ColorUtil.NoticeableDifference(borderColor.Value, ctx.styles.backgroundColor))
                         {
                             borderColor = ctx.styles.microBorders.pen.color; // default
                         }
+
                         pen.Color = borderColor.Value;
                         pen.DashStyle = LineStyleToDashStyle(borderStyle.Value);
 
